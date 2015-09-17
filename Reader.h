@@ -10,7 +10,7 @@ class Reader
 public:
     Reader(const QString &archiveLocation);
     ~Reader();
-    QByteArray ReadFile(fileLocation);
+    QByteArray ReadFile(const QString &fileLocation);
 
 private:
     QFile *file;
