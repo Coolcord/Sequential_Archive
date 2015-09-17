@@ -1,6 +1,8 @@
 #include "Sequential_Archive.h"
 #include "Packer.h"
 #include "Unpacker.h"
+#include "Common_Strings.h"
+#include <QFileInfo>
 
 Sequential_Archive::Sequential_Archive() {
     this->parent = NULL;
@@ -17,7 +19,13 @@ void Sequential_Archive::Shutdown() {
 }
 
 int Sequential_Archive::Pack(const QString &sourceFolder) {
+    //Create the archive file with the same name as the source folder
+    QFileInfo directoryInfo(sourceFolder);
+    if (!directoryInfo.exists() || !directoryInfo.isReadable()) return 1; //unable to read the source folder
+    QString destinationArchive = directoryInfo.path() + directoryInfo.fileName() + "." + Common_Strings::EXTENSION;
 
+    Packer packer;
+    return packer.Pack(sourceFolder, destinationArchive);
 }
 
 int Sequential_Archive::Pack(const QString &sourceFolder, const QString &destinationArchive) {

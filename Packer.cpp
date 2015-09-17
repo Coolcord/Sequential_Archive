@@ -2,8 +2,6 @@
 #include "Common_Strings.h"
 #include "Common_Data.h"
 #include <QDir>
-#include <QFile>
-#include <QFileInfo>
 #include <QTextStream>
 #include <QHash>
 #include <assert.h>
@@ -31,15 +29,17 @@ int Packer::Pack(const QString &sourceFolderLocation, const QString &destination
     //Create the archive file and write the header
     this->file = new QFile(destinationArchiveLocation);
     if (this->file->open(QFile::ReadWrite | QFile::Truncate)) return 3; //unable to create the archive file
-    if (!this->Write_Archive_Header(folderInfo.fileName())) return 4; //unable to write the archive file header
+    if (!this->Write_Archive_Header(folderInfo)) return 4; //unable to write the archive file header
 
-    return this->Pack_Directory(sourceFolderLocation);
+    if (!this->Pack_Directory(sourceFolderLocation)) return 5; //unable to pack the directory
+    return 0;
 }
 
-bool Packer::Write_Archive_Header(const QString &name) {
+bool Packer::Write_Archive_Header(const QFileInfo &sourceFolderInfo) {
     assert(this->file);
     if (!this->file->seek(0)) return false;
-    QString header = Common_Strings::FORMAT_NAME + "\n" + name + "\n";
+    QString header = Common_Strings::FORMAT_NAME + "\n" +
+            QString::number(this->Get_Index_Table_Size(sourceFolderInfo.filePath())) + sourceFolderInfo.fileName() + static_cast<char>(Common_Data::END_SECTION);
     return (this->file->write(header.toUtf8().data()) != -1);
 }
 
@@ -48,7 +48,7 @@ bool Packer::Pack_Directory(const QString &sourceFolderLocation) {
     assert(dir.count() > 0); //empty folders should never enter this function
 
     //Create a table entry for each directory
-    QFileInfoList directories = dir.entryInfoList(QDir::AllDirs | QDir::NoDotAndDotDot);
+    QFileInfoList directories = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
     QHash<QString, qint64> directoryTable;
     foreach (QFileInfo directory, directories) {
         if (directory.dir().count() == 0) continue; //we won't pack empty folders
@@ -79,33 +79,39 @@ bool Packer::Pack_Directory(const QString &sourceFolderLocation) {
 
     //Pack each file. Update the table entry for each file along the way
     foreach (QFileInfo file, files) {
+        if (!this->file->seek(this->file->size())) return false;
         qint64 startByte = this->file->pos();
-        if (!this->Pack_File(file.path())) return false;
-        qint64 endByte = this->file->pos();
+        if (!this->Pack_File(file.filePath())) return false;
 
         //Update the table entry with the new pointers
         if (!this->file->seek(fileTable.value(file.fileName()))) return false;
         if (this->file->write(QString::number(startByte).toUtf8().data()) != 8) return false;
-        if (this->file->write(QString::number(endByte).toUtf8().data()) != 8) return false;
+        if (this->file->write(QString::number(startByte+file.size()).toUtf8().data()) != 8) return false;
     }
 
     //Pack every subdirectory
-    if (!this->file->seek(this->file->size())) return false;
     foreach (QFileInfo directory, directories) {
         if (directory.dir().count() == 0) continue; //ignore empty folders
+        if (!this->file->seek(this->file->size())) return false;
 
-        //TODO: Directories need a start and end pointer.
-        //      However, these pointers will only refer to the index table.
-        //      The root directory does not need a start pointer.
+        qint64 startByte = this->file->pos();
+        if (!this->Pack_Directory(directory.filePath())) return false;
 
-        if (!this->Pack_Directory(directory.path())) return false;
+        //Update the table entry with the new pointers
+        if (!this->file->seek(directoryTable.value(directory.fileName()))) return false;
+        if (this->file->write(QString::number(startByte).toUtf8().data()) != 8) return false;
+        if (this->file->write(QString::number(startByte+this->Get_Index_Table_Size(directory.filePath())).toUtf8().data()) != 8) return false;
     }
+
+    //Seek back to the end of the file
+    if (!this->file->seek(this->file->size())) return false;
     return true;
 }
 
 bool Packer::Pack_File(const QString &sourceFileLocation) {
     QFile sourceFile(sourceFileLocation);
     if (!sourceFile.open(QFile::ReadOnly)) return false;
+    assert(this->file->pos() == this->file->size());
 
     //Determine if the entire file can fit into one buffer
     qint64 fileSize = sourceFile.size();
@@ -125,4 +131,17 @@ bool Packer::Pack_File_With_Buffers(QFile *sourceFile, qint64 fileSize) {
         fileSize -= bufferSize;
     }
     return true;
+}
+
+int Packer::Get_Index_Table_Size(const QString &sourceFolderLocation) {
+    QDir dir = QDir(sourceFolderLocation);
+    assert(dir.exists());
+    int indexTableSize = 0;
+
+    //Add the size of the index table using the filenames in the folder
+    foreach (QFileInfo entry, QDir(sourceFolderLocation).entryInfoList(QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot)) {
+        indexTableSize += 16; //start pointer and size
+        indexTableSize += entry.fileName().length();
+    }
+    return indexTableSize;
 }
