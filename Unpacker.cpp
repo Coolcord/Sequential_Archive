@@ -8,7 +8,7 @@ Unpacker::~Unpacker() {
 
 }
 
-int Unpacker::Unpack(const QString &sourceArchive, const QString &destinationFolder) {
+int Unpacker::Unpack(const QString &sourceArchiveLocation, const QString &destinationFolderLocation) {
 
 }
 

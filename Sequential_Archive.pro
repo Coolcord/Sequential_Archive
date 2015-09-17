@@ -16,7 +16,8 @@ SOURCES += \
     Sequential_Archive.cpp \
     Packer.cpp \
     Unpacker.cpp \
-    Scrambler.cpp
+    Scrambler.cpp \
+    Reader.cpp
 
 HEADERS += \
     Sequential_Archive.h \
@@ -24,7 +25,9 @@ HEADERS += \
     Packer.h \
     Unpacker.h \
     Scrambler.h \
-    Common_Strings.h
+    Common_Strings.h \
+    Common_Data.h \
+    Reader.h
 
 unix {
     target.path = /usr/lib

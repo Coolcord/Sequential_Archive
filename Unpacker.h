@@ -9,7 +9,7 @@ class Unpacker
 public:
     Unpacker();
     ~Unpacker();
-    int Unpack(const QString &sourceArchive, const QString &destinationFolder);
+    int Unpack(const QString &sourceArchiveLocation, const QString &destinationFolderLocation);
 
 private:
     QFile *file;
