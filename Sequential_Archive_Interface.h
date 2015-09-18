@@ -11,12 +11,12 @@ public:
     virtual void Shutdown()=0;
     virtual int Pack(const QString &sourceFolder)=0;
     virtual int Pack(const QString &sourceFolder, const QString &destinationArchive)=0;
-    virtual int PackAndScramble(const QString &sourceFolder)=0;
-    virtual int PackAndScramble(const QString &sourceFolder, const QString &destinationArchive)=0;
+    virtual int PackAndScramble(const QString &sourceFolder, unsigned char scrambleKey)=0;
+    virtual int PackAndScramble(const QString &sourceFolder, const QString &destinationArchive, unsigned char scrambleKey)=0;
     virtual int Unpack(const QString &sourceArchive)=0;
     virtual int Unpack(const QString &sourceArchive, const QString &destinationFolder)=0;
-    virtual int UnscrambleAndUnpack(const QString &sourceArchive)=0;
-    virtual int UnscrambleAndUnpack(const QString &sourceArchive, const QString &destinationFolder)=0;
+    virtual int UnscrambleAndUnpack(const QString &sourceArchive, unsigned char scrambleKey)=0;
+    virtual int UnscrambleAndUnpack(const QString &sourceArchive, const QString &destinationFolder, unsigned char scrambleKey)=0;
 };
 
 Q_DECLARE_INTERFACE(Sequential_Archive_Interface, "Sequential_Archive_Interface")

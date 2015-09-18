@@ -1,4 +1,5 @@
 #include "Packer.h"
+#include "Scrambler.h"
 #include "Common_Strings.h"
 #include "Common_Data.h"
 #include <QDir>
@@ -8,10 +9,23 @@
 
 Packer::Packer() {
     this->file = NULL;
+    this->scrambler = NULL;
+}
+
+Packer::Packer(bool scramble) {
+    this->file = NULL;
+    if (scramble) this->scrambler = new Scrambler(static_cast<unsigned char>(qrand()%0x100));
+    else this->scrambler = NULL;
+}
+
+Packer::Packer(bool scramble, int amount) {
+    this->file = NULL;
+    if (scramble) this->scrambler = new Scrambler(amount);
+    else this->scrambler = NULL;
 }
 
 Packer::~Packer() {
-
+    delete this->scrambler;
 }
 
 int Packer::Pack(const QString &sourceFolderLocation, const QString &destinationArchiveLocation) {
@@ -122,12 +136,11 @@ bool Packer::Pack_File(const QString &sourceFileLocation) {
     }
 }
 
-bool Packer::Pack_File_With_Buffers(QFile *sourceFile, qint64 fileSize) {
-    assert(sourceFile);
+bool Packer::Pack_File_With_Buffers(const QFile &sourceFile, qint64 fileSize) {
     while (fileSize > 0) {
         qint64 bufferSize = Common_Data::MAX_BUFFER_SIZE;
         if (fileSize < Common_Data::MAX_BUFFER_SIZE) bufferSize = fileSize;
-        if (this->file->write(sourceFile->read(bufferSize)) != bufferSize) return false;
+        if (this->file->write(sourceFile.read(bufferSize)) != bufferSize) return false;
         fileSize -= bufferSize;
     }
     return true;
@@ -144,4 +157,14 @@ int Packer::Get_Index_Table_Size(const QString &sourceFolderLocation) {
         indexTableSize += entry.fileName().length();
     }
     return indexTableSize;
+}
+
+bool Packer::Write_Buffer_To_File(const QFile &file, QByteArray &buffer) {
+    return this->Write_Buffer_To_File(file, buffer, file.size());
+}
+
+bool Packer::Write_Buffer_To_File(const QFile &file, QByteArray &buffer, qint64 offset) {
+    if (!file.seek(offset)) return false;
+    if (this->scrambler != NULL) this->scrambler->Scramble(buffer);
+    return (file.write(buffer) == buffer.size());
 }

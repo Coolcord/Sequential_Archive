@@ -17,12 +17,12 @@ public:
     void Shutdown();
     int Pack(const QString &sourceFolder);
     int Pack(const QString &sourceFolder, const QString &destinationArchive);
-    int PackAndScramble(const QString &sourceFolder);
-    int PackAndScramble(const QString &sourceFolder, const QString &destinationArchive);
+    int PackAndScramble(const QString &sourceFolder, unsigned char scrambleKey);
+    int PackAndScramble(const QString &sourceFolder, const QString &destinationArchive, unsigned char scrambleKey);
     int Unpack(const QString &sourceArchive);
     int Unpack(const QString &sourceArchive, const QString &destinationFolder);
-    int UnscrambleAndUnpack(const QString &sourceArchive);
-    int UnscrambleAndUnpack(const QString &sourceArchive, const QString &destinationFolder);
+    int UnscrambleAndUnpack(const QString &sourceArchive, unsigned char scrambleKey);
+    int UnscrambleAndUnpack(const QString &sourceArchive, const QString &destinationFolder, unsigned char scrambleKey);
 
 private:
 

@@ -1,48 +1,34 @@
 #include "Scrambler.h"
 #include <assert.h>
 
-Scrambler::Scrambler() {
-
+Scrambler::Scrambler(unsigned char scrambleKey) {
+    this->scrambleKey = scrambleKey;
 }
 
-Scrambler::~Scrambler() {
-
+void Scrambler::Scramble(QByteArray &buffer, qint64 offsetInFile) {
+    for (int i = 0; i < buffer.size(); ++i) {
+        this->ScrambleByte(buffer, i, offsetInFile);
+    }
 }
 
-void Scrambler::Scramble(QByteArray *buffer, qint64 offsetInFile, int amount) {
+void Scrambler::Unscramble(QByteArray &buffer, qint64 offsetInFile) {
     assert(buffer);
-    for (int i = 0; i < buffer->size(); ++i) {
-        this->ScrambleByte(buffer, i, offsetInFile, amount);
+    for (int i = 0; i < buffer.size(); ++i) {
+        this->UnscrambleByte(buffer, i, offsetInFile);
     }
 }
 
-void Scrambler::Unscramble(QByteArray *buffer, qint64 offsetInFile, int amount) {
-    assert(buffer);
-    for (int i = 0; i < buffer->size(); ++i) {
-        this->UnscrambleByte(buffer, i, offsetInFile, amount);
-    }
+void Scrambler::ScrambleByte(QByteArray &buffer, int index, qint64 offsetInFile) {
+    buffer.data()[index] = static_cast<char>((buffer.data()[index]+this->GetScrambleAmount(index, offsetInFile))%0x100);
 }
 
-void Scrambler::ScrambleByte(QByteArray *buffer, int index, qint64 offsetInFile, int amount) {
-    buffer->data()[index] = static_cast<char>(static_cast<unsigned char>((buffer->data()[index]+this->GetScrambleAmount(index, offsetInFile, amount))%0x100));
+void Scrambler::UnscrambleByte(QByteArray &buffer, int index, qint64 offsetInFile) {
+    unsigned char decrementAmount = this->GetScrambleAmount(index, offsetInFile);
+    unsigned char byte = static_cast<unsigned char>(buffer.data()[index]);
+    byte -= decrementAmount; //the size of the unsigned char will handle wrapping for us
+    buffer.data()[index] = static_cast<char>(byte);
 }
 
-void Scrambler::UnscrambleByte(QByteArray *buffer, int index, qint64 offsetInFile, int amount) {
-    int decrementAmount = this->GetScrambleAmount(index, offsetInFile, amount);
-    int byte = static_cast<int>(static_cast<unsigned char>(buffer->data()[index]));
-    if (byte < decrementAmount) {
-        while (byte != 0x00) {
-            --byte;
-            --decrementAmount;
-        }
-        assert(decrementAmount >= 0);
-        byte = 0xFF - decrementAmount;
-    } else {
-        byte -= decrementAmount;
-    }
-    buffer->data()[index] = static_cast<char>(byte);
-}
-
-int Scrambler::GetScrambleAmount(int index, qint64 offsetInFile, int amount) {
-    return static_cast<int>((offsetInFile+amount+index)%0x100);
+unsigned char Scrambler::GetScrambleAmount(int index, qint64 offsetInFile) {
+    return (offsetInFile+index+this->scrambleKey)%0x100;
 }

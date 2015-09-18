@@ -3,6 +3,7 @@
 #include "Unpacker.h"
 #include "Common_Strings.h"
 #include <QFileInfo>
+#include <QTime>
 
 Sequential_Archive::Sequential_Archive() {
     this->parent = NULL;
@@ -12,6 +13,7 @@ Sequential_Archive::Sequential_Archive() {
 void Sequential_Archive::Startup(QWidget *parent, const QString &applicationLocation) {
     this->parent = parent;
     this->applicationLocation = applicationLocation;
+    qsrand(QTime::currentTime().msecsSinceStartOfDay());
 }
 
 void Sequential_Archive::Shutdown() {
@@ -33,11 +35,11 @@ int Sequential_Archive::Pack(const QString &sourceFolder, const QString &destina
     return packer.Pack(sourceFolder, destinationArchive);
 }
 
-int Sequential_Archive::PackAndScramble(const QString &sourceFolder) {
+int Sequential_Archive::PackAndScramble(const QString &sourceFolder, unsigned char scrambleKey) {
 
 }
 
-int Sequential_Archive::PackAndScramble(const QString &sourceFolder, const QString &destinationArchive) {
+int Sequential_Archive::PackAndScramble(const QString &sourceFolder, const QString &destinationArchive, unsigned char scrambleKey) {
 
 }
 
@@ -50,11 +52,11 @@ int Sequential_Archive::Unpack(const QString &sourceArchive, const QString &dest
     return unpacker.Unpack(sourceArchive, destinationFolder);
 }
 
-int Sequential_Archive::UnscrambleAndUnpack(const QString &sourceArchive) {
+int Sequential_Archive::UnscrambleAndUnpack(const QString &sourceArchive, unsigned char scrambleKey) {
 
 }
 
-int Sequential_Archive::UnscrambleAndUnpack(const QString &archive, const QString &destinationFolder) {
+int Sequential_Archive::UnscrambleAndUnpack(const QString &archive, const QString &destinationFolder, unsigned char scrambleKey) {
 
 }
 

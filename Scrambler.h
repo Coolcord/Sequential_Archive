@@ -6,15 +6,17 @@
 class Scrambler
 {
 public:
-    Scrambler();
-    ~Scrambler();
-    void Scramble(QByteArray *buffer, qint64 offsetInFile, int amount);
-    void Unscramble(QByteArray *buffer, qint64 offsetInFile, int amount);
+    Scrambler(unsigned char scrambleKey);
+    ~Scrambler() {}
+    void Scramble(QByteArray &buffer, qint64 offsetInFile);
+    void Unscramble(QByteArray &buffer, qint64 offsetInFile);
 
 private:
-    void ScrambleByte(QByteArray *buffer, int index, qint64 offsetInFile, int amount);
-    void UnscrambleByte(QByteArray *buffer, int index, qint64 offsetInFile, int amount);
-    int GetScrambleAmount(int index, qint64 offsetInFile, int amount);
+    void ScrambleByte(QByteArray &buffer, int index, qint64 offsetInFile);
+    void UnscrambleByte(QByteArray &buffer, int index, qint64 offsetInFile);
+    unsigned char GetScrambleAmount(int index, qint64 offsetInFile);
+
+    unsigned char scrambleKey;
 };
 
 #endif // SCRAMBLER_H
