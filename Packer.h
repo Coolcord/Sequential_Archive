@@ -22,7 +22,8 @@ private:
     bool Pack_Directory(QFile &file, const QString &sourceFolderLocation);
     bool Pack_File(QFile &file, const QString &sourceFileLocation);
     bool Pack_File_With_Buffers(QFile &file, QFile &sourceFile, qint64 fileSize);
-    int Get_Index_Table_Size(const QString &sourceFolderLocation);
+    qint64 Get_Index_Table_Size(const QString &sourceFolderLocation);
+    QByteArray Get_Byte_Array_From_Number(qint64 number);
     bool Write_Buffer_To_File(QFile &file, QByteArray &buffer);
     bool Write_Buffer_To_File(QFile &file, QByteArray &buffer, qint64 offset);
     bool Write_Buffer_To_File(QFile &file, const QString &buffer);

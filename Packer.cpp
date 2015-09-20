@@ -48,7 +48,7 @@ int Packer::Pack(const QString &sourceFolderLocation, const QString &destination
 
 bool Packer::Write_Archive_Header(QFile &file, const QFileInfo &sourceFolderInfo) {
     QString header = Common_Strings::FORMAT_NAME +
-            QString::number(this->Get_Index_Table_Size(sourceFolderInfo.filePath())) + sourceFolderInfo.fileName() + static_cast<char>(Common_Data::END_SECTION);
+            this->Get_Byte_Array_From_Number(this->Get_Index_Table_Size(sourceFolderInfo.filePath())) + sourceFolderInfo.fileName() + static_cast<char>(Common_Data::END_SECTION);
     return this->Write_Buffer_To_File(file, header, 0);
 }
 
@@ -91,7 +91,7 @@ bool Packer::Pack_Directory(QFile &file, const QString &sourceFolderLocation) {
         if (!this->Pack_File(file, sourceFile.filePath())) return false;
 
         //Update the table entry with the new pointers
-        if (!this->Write_Buffer_To_File(file, QString::number(startByte)+QString::number(startByte+this->Get_Index_Table_Size(sourceFile.filePath()), fileTable.value(sourceFile.fileName())))) return false;
+        if (!this->Write_Buffer_To_File(file, this->Get_Byte_Array_From_Number(startByte)+this->Get_Byte_Array_From_Number(startByte+this->Get_Index_Table_Size(sourceFile.filePath())), fileTable.value(sourceFile.fileName()))) return false;
     }
 
     //Pack every subdirectory
@@ -102,7 +102,7 @@ bool Packer::Pack_Directory(QFile &file, const QString &sourceFolderLocation) {
         if (!this->Pack_Directory(file, sourceDirectory.filePath())) return false;
 
         //Update the table entry with the new pointers
-        if (!this->Write_Buffer_To_File(file, QString::number(startByte)+QString::number(startByte+this->Get_Index_Table_Size(sourceDirectory.filePath()), directoryTable.value(sourceDirectory.fileName())))) return false;
+        if (!this->Write_Buffer_To_File(file, this->Get_Byte_Array_From_Number(startByte)+this->Get_Byte_Array_From_Number(startByte+this->Get_Index_Table_Size(sourceDirectory.filePath())), directoryTable.value(sourceDirectory.fileName()))) return false;
     }
 
     return true;
@@ -132,10 +132,10 @@ bool Packer::Pack_File_With_Buffers(QFile &file, QFile &sourceFile, qint64 fileS
     return true;
 }
 
-int Packer::Get_Index_Table_Size(const QString &sourceFolderLocation) {
+qint64 Packer::Get_Index_Table_Size(const QString &sourceFolderLocation) {
     QDir dir = QDir(sourceFolderLocation);
     assert(dir.exists());
-    int indexTableSize = 0;
+    qint64 indexTableSize = 0;
 
     //Add the size of the index table using the filenames in the folder
     foreach (QFileInfo entry, QDir(sourceFolderLocation).entryInfoList(QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot)) {
@@ -143,6 +143,19 @@ int Packer::Get_Index_Table_Size(const QString &sourceFolderLocation) {
         indexTableSize += entry.fileName().length();
     }
     return indexTableSize;
+}
+
+QByteArray Packer::Get_Byte_Array_From_Number(qint64 number) {
+    QByteArray byteArray(8, ' ');
+    byteArray.data()[0] = static_cast<char>(static_cast<unsigned char>(((number&0xFF00000000000000)>>38)&0xFF));
+    byteArray.data()[1] = static_cast<char>(static_cast<unsigned char>((number&0x00FF000000000000)>>30));
+    byteArray.data()[2] = static_cast<char>(static_cast<unsigned char>((number&0x0000FF0000000000)>>28));
+    byteArray.data()[3] = static_cast<char>(static_cast<unsigned char>((number&0x000000FF00000000)>>20));
+    byteArray.data()[4] = static_cast<char>(static_cast<unsigned char>((number&0x00000000FF000000)>>18));
+    byteArray.data()[5] = static_cast<char>(static_cast<unsigned char>((number&0x0000000000FF0000)>>10));
+    byteArray.data()[6] = static_cast<char>(static_cast<unsigned char>((number&0x000000000000FF00)>>8));
+    byteArray.data()[7] = static_cast<char>(static_cast<unsigned char>((number&0x00000000000000FF)));
+    return byteArray;
 }
 
 bool Packer::Write_Buffer_To_File(QFile &file, QByteArray &buffer) {
