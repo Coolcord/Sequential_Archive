@@ -13,7 +13,7 @@ class Packer
 public:
     Packer();
     Packer(bool scramble);
-    Packer(bool scramble, int amount);
+    Packer(bool scramble, unsigned char scrambleKey);
     ~Packer();
     int Pack(const QString &sourceFolderLocation, const QString &destinationArchiveLocation);
 
@@ -30,7 +30,6 @@ private:
     bool Write_Buffer_To_File(QFile &file, const QString &buffer, qint64 offset);
 
     Scrambler *scrambler;
-    QString destinationArchiveLocation;
 };
 
 #endif // PACKER_H

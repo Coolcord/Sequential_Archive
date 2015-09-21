@@ -5,6 +5,10 @@ Scrambler::Scrambler(unsigned char scrambleKey) {
     this->scrambleKey = scrambleKey;
 }
 
+unsigned char Scrambler::Get_Scramble_Key() {
+    return this->scrambleKey;
+}
+
 void Scrambler::Scramble(QByteArray &buffer, qint64 offsetInFile) {
     for (int i = 0; i < buffer.size(); ++i) {
         this->ScrambleByte(buffer, i, offsetInFile);

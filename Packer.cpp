@@ -16,8 +16,8 @@ Packer::Packer(bool scramble) {
     else this->scrambler = NULL;
 }
 
-Packer::Packer(bool scramble, int amount) {
-    if (scramble) this->scrambler = new Scrambler(amount);
+Packer::Packer(bool scramble, unsigned char scrambleKey) {
+    if (scramble) this->scrambler = new Scrambler(scrambleKey);
     else this->scrambler = NULL;
 }
 
@@ -26,8 +26,6 @@ Packer::~Packer() {
 }
 
 int Packer::Pack(const QString &sourceFolderLocation, const QString &destinationArchiveLocation) {
-    this->destinationArchiveLocation = destinationArchiveLocation;
-
     //Open the source folder and create the destination archive file
     QFileInfo folderInfo(sourceFolderLocation);
     if (!folderInfo.exists() || !folderInfo.isReadable()) return 1; //unable to read the source folder
@@ -42,7 +40,16 @@ int Packer::Pack(const QString &sourceFolderLocation, const QString &destination
     if (file.open(QFile::ReadWrite | QFile::Truncate)) return 3; //unable to create the archive file
     if (!this->Write_Archive_Header(file, folderInfo)) return 4; //unable to write the archive file header
 
+    //Pack all of the files
     if (!this->Pack_Directory(file, sourceFolderLocation)) return 5; //unable to pack the directory
+
+    //Write the scramble key to the end of the file if it was used
+    if (!file.seek(file.size())) return 6; //unable to write scramble key
+    if (this->scrambler) {
+        QByteArray buffer(1, ' ');
+        buffer.data()[0] = static_cast<char>(this->scrambler->Get_Scramble_Key());
+        if (file.write(buffer) != buffer.size()) return 6; //unable to write scramble key
+    }
     return 0;
 }
 
@@ -91,7 +98,7 @@ bool Packer::Pack_Directory(QFile &file, const QString &sourceFolderLocation) {
         if (!this->Pack_File(file, sourceFile.filePath())) return false;
 
         //Update the table entry with the new pointers
-        if (!this->Write_Buffer_To_File(file, this->Get_Byte_Array_From_Number(startByte)+this->Get_Byte_Array_From_Number(startByte+this->Get_Index_Table_Size(sourceFile.filePath())), fileTable.value(sourceFile.fileName()))) return false;
+        if (!this->Write_Buffer_To_File(file, this->Get_Byte_Array_From_Number(startByte)+this->Get_Byte_Array_From_Number(this->Get_Index_Table_Size(sourceFile.filePath())), fileTable.value(sourceFile.fileName()))) return false;
     }
 
     //Pack every subdirectory
@@ -102,7 +109,7 @@ bool Packer::Pack_Directory(QFile &file, const QString &sourceFolderLocation) {
         if (!this->Pack_Directory(file, sourceDirectory.filePath())) return false;
 
         //Update the table entry with the new pointers
-        if (!this->Write_Buffer_To_File(file, this->Get_Byte_Array_From_Number(startByte)+this->Get_Byte_Array_From_Number(startByte+this->Get_Index_Table_Size(sourceDirectory.filePath())), directoryTable.value(sourceDirectory.fileName()))) return false;
+        if (!this->Write_Buffer_To_File(file, this->Get_Byte_Array_From_Number(startByte)+this->Get_Byte_Array_From_Number(this->Get_Index_Table_Size(sourceDirectory.filePath())), directoryTable.value(sourceDirectory.fileName()))) return false;
     }
 
     return true;

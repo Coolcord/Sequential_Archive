@@ -8,6 +8,7 @@ class Scrambler
 public:
     Scrambler(unsigned char scrambleKey);
     ~Scrambler() {}
+    unsigned char Get_Scramble_Key();
     void Scramble(QByteArray &buffer, qint64 offsetInFile);
     void Unscramble(QByteArray &buffer, qint64 offsetInFile);
 
