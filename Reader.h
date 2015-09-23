@@ -24,8 +24,11 @@ public:
     bool Extract_Directory(const QString &directoryPathInArchive, const QString &destination);
 
 private:
+    bool Extract_File_With_Buffer(const QString &filePathInArchive, const QString &destination);
     bool Is_Archive_Valid();
     bool Read_Scramble_Key(unsigned char &scrambleKey);
+    QString Get_File_Name_From_Path(const QString &path);
+    QByteArray Read_Bytes(qint64 offset, qint64 size);
     QByteArray Read_Until_End_Byte(qint64 offset); //try to avoid using this function!
 
     QFile *file;
