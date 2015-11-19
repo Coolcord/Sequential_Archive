@@ -32,7 +32,10 @@ QString Reader::Get_Archive_Name() {
     assert(this->file);
     assert(this->file->isOpen() && this->file->isReadable());
 
+    //Read the starting offset of the root table
+    if (!this->file->seek(Common_Strings::FORMAT_NAME.length())) return false;
     //TODO: Write this...
+    //this->Read_Bytes(Common_Strings::FORMAT_NAME.length(), 8);
 }
 
 QStringList Reader::Get_Directories(const QString &pathInArchive) {
@@ -120,7 +123,7 @@ bool Reader::Read_Scramble_Key(unsigned char &scrambleKey) {
     assert(!this->scrambler);
 
     //Read the key from the end of the file
-    if (!this->file->seek(this->file->size()-1)) return false;
+    if (!this->file->seek(this->file->size()-2)) return false;
     QByteArray scrambleKeyBuffer = this->file->read(1);
     if (scrambleKeyBuffer.isEmpty()) return false;
 
