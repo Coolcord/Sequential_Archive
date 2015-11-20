@@ -8,17 +8,11 @@
 #include <assert.h>
 
 Packer::Packer() {
-    this->scrambler = NULL;
+    this->scrambler = new Scrambler(static_cast<unsigned char>(qrand()%0x100));
 }
 
-Packer::Packer(bool scramble) {
-    if (scramble) this->scrambler = new Scrambler(static_cast<unsigned char>(qrand()%0x100));
-    else this->scrambler = NULL;
-}
-
-Packer::Packer(bool scramble, unsigned char scrambleKey) {
-    if (scramble) this->scrambler = new Scrambler(scrambleKey);
-    else this->scrambler = NULL;
+Packer::Packer(unsigned char scrambleKey) {
+    this->scrambler = new Scrambler(scrambleKey);
 }
 
 Packer::~Packer() {
@@ -45,11 +39,10 @@ int Packer::Pack(const QString &sourceFolderLocation, const QString &destination
 
     //Write the scramble key to the end of the file if it was used
     if (!file.seek(file.size())) return 6; //unable to write scramble key
-    if (this->scrambler) {
-        QByteArray buffer(1, ' ');
-        buffer.data()[0] = static_cast<char>(this->scrambler->Get_Scramble_Key());
-        if (file.write(buffer) != buffer.size()) return 6; //unable to write scramble key
-    }
+    assert(this->scrambler);
+    QByteArray buffer(1, ' ');
+    buffer.data()[0] = static_cast<char>(this->scrambler->Get_Scramble_Key());
+    if (file.write(buffer) != buffer.size()) return 6; //unable to write scramble key
     return 0;
 }
 
@@ -184,7 +177,8 @@ bool Packer::Write_Buffer_To_File(QFile &file, QByteArray &buffer) {
 
 bool Packer::Write_Buffer_To_File(QFile &file, QByteArray &buffer, qint64 offset) {
     if (!file.seek(offset)) return false;
-    if (this->scrambler != NULL) this->scrambler->Scramble(buffer, offset);
+    assert(this->scrambler);
+    this->scrambler->Scramble(buffer, offset);
     return (file.write(buffer) == buffer.size());
 }
 

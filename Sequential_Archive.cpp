@@ -1,6 +1,5 @@
 #include "Sequential_Archive.h"
 #include "Packer.h"
-#include "Unpacker.h"
 #include "Common_Strings.h"
 #include <QFileInfo>
 #include <QTime>
@@ -48,8 +47,7 @@ int Sequential_Archive::Unpack(const QString &sourceArchive) {
 }
 
 int Sequential_Archive::Unpack(const QString &sourceArchive, const QString &destinationFolder) {
-    Unpacker unpacker;
-    return unpacker.Unpack(sourceArchive, destinationFolder);
+
 }
 
 int Sequential_Archive::UnscrambleAndUnpack(const QString &sourceArchive, unsigned char scrambleKey) {

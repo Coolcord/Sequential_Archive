@@ -13,7 +13,7 @@ class Packer
 public:
     Packer();
     Packer(bool scramble);
-    Packer(bool scramble, unsigned char scrambleKey);
+    Packer(unsigned char scrambleKey);
     ~Packer();
     int Pack(const QString &sourceFolderLocation, const QString &destinationArchiveLocation);
 

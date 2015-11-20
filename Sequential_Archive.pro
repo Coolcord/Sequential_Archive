@@ -15,7 +15,6 @@ DEFINES += Sequential_Archive_LIBRARY
 SOURCES += \
     Sequential_Archive.cpp \
     Packer.cpp \
-    Unpacker.cpp \
     Scrambler.cpp \
     Reader.cpp
 
@@ -23,7 +22,6 @@ HEADERS += \
     Sequential_Archive.h \
     Sequential_Archive_Interface.h \
     Packer.h \
-    Unpacker.h \
     Scrambler.h \
     Common_Strings.h \
     Common_Data.h \

@@ -114,23 +114,17 @@ bool Reader::Extract_Directory(const QString &directoryPathInArchive, const QStr
 }
 
 bool Reader::Is_Archive_Valid() {
-    //Read the header to determine if the archive is valid
-    if (!this->file->seek(0)) return false;
-    QByteArray headerBuffer = this->file->read(Common_Strings::FORMAT_NAME.length());
-    QByteArray headerEndByteBuffer = this->file->read(1);
-    if (headerBuffer.isEmpty() || headerEndByteBuffer.isEmpty()) return false; //unable to read the header
-
-    //Check to see if the archive has been scrambled
-    if (QString(headerBuffer) != Common_Strings::FORMAT_NAME) {
+    //Read the scramble key if it wasn't specified
+    if (!this->scrambler) {
         unsigned char scrambleKey = 0x00;
         if (!this->Read_Scramble_Key(scrambleKey)) return false;
         this->scrambler = new Scrambler(scrambleKey);
     }
 
-    //Check to see if the end byte is in the header
-    if (this->scrambler) this->scrambler->Unscramble(headerEndByteBuffer, Common_Strings::FORMAT_NAME.length());
-
-    return true; //the archive appears to be a valid sequential archive!
+    //Read the header to determine if the archive is valid
+    QString header = this->Read_Bytes(0, Common_Strings::FORMAT_NAME.length());
+    if (header.length() == 0) return false; //unable to read the header
+    return (header == Common_Strings::FORMAT_NAME); //if the header matches up, then assume that the archive is valid
 }
 
 bool Reader::Change_Local_Directory(const QString &directory) {
