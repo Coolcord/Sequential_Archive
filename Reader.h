@@ -24,6 +24,7 @@ public:
     bool Extract_Directory(const QString &directoryPathInArchive, const QString &destination);
 
 private:
+    bool Extract_File_With_Buffer(const QString &filePathInArchive, const QString &destination);
     bool Is_Archive_Valid();
     bool Read_Scramble_Key(unsigned char &scrambleKey);
     qint64 Read_qint64(qint64 offset);

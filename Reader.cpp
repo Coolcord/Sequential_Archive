@@ -69,6 +69,11 @@ bool Reader::Extract_File(const QString &filePathInArchive, const QString &desti
     //TODO: Write this...
 }
 
+
+bool Reader::Extract_File_With_Buffer(const QString &filePathInArchive, const QString &destination) {
+    //TODO: Write this...
+}
+
 bool Reader::Extract_Directory(const QString &directoryPathInArchive, const QString &destination) {
     assert(this->file);
     assert(this->file->isOpen() && this->file->isReadable());
@@ -90,10 +95,6 @@ bool Reader::Extract_Directory(const QString &directoryPathInArchive, const QStr
     }
 
     return true;
-}
-
-bool Reader::Extract_File_With_Buffer(const QString &filePathInArchive, const QString &destination) {
-
 }
 
 bool Reader::Is_Archive_Valid() {
