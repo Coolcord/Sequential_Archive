@@ -21,7 +21,10 @@ Reader::~Reader() {
 }
 
 bool Reader::Open() {
-    return this->file->open(QFile::ReadOnly);
+    if (!this->file->open(QFile::ReadOnly)) return false;
+    if (!this->Is_Archive_Valid()) return false;
+    if (!this->Change_Directory("/")) return false;
+    return true;
 }
 
 void Reader::Close() {
@@ -29,9 +32,6 @@ void Reader::Close() {
 }
 
 QString Reader::Get_Archive_Name() {
-    assert(this->file);
-    assert(this->file->isOpen() && this->file->isReadable());
-
     //Read the starting offset of the root table
     qint64 rootTableOffset = this->Read_qint64(Common_Strings::FORMAT_NAME.length());
     if (rootTableOffset == -1) return QString();
@@ -41,18 +41,36 @@ QString Reader::Get_Archive_Name() {
     return QString(this->Read_Bytes(nameOffset, rootTableOffset-nameOffset));
 }
 
-QStringList Reader::Get_Directories(const QString &pathInArchive) {
-    assert(this->file);
-    assert(this->file->isOpen() && this->file->isReadable());
+bool Reader::Change_Directory(const QString &directory) {
 
-    //TODO: Write this...
+}
+
+QStringList Reader::Get_Directories() {
+    return this->Read_Index_Table_Names(this->currentDirectoryOffset);
+}
+
+QStringList Reader::Get_Directories(const QString &pathInArchive) {
+    QString previousPath = this->currentPath;
+    qint64 previousOffset = this->currentDirectoryOffset;
+    if (!this->Change_Directory(pathInArchive)) return QStringList();
+    QStringList files = this->Get_Directories();
+    this->currentPath = previousPath;
+    this->currentDirectoryOffset = previousOffset;
+    return files;
+}
+
+QStringList Reader::Get_Files() {
+    return this->Read_Index_Table_Names(this->Read_qint64(this->currentDirectoryOffset)+this->currentDirectoryOffset);
 }
 
 QStringList Reader::Get_Files(const QString &pathInArchive) {
-    assert(this->file);
-    assert(this->file->isOpen() && this->file->isReadable());
-
-    //TODO: Write this...
+    QString previousPath = this->currentPath;
+    qint64 previousOffset = this->currentDirectoryOffset;
+    if (!this->Change_Directory(pathInArchive)) return QStringList();
+    QStringList files = this->Get_Files();
+    this->currentPath = previousPath;
+    this->currentDirectoryOffset = previousOffset;
+    return files;
 }
 
 QByteArray Reader::Read_File(const QString &filePathInArchive) {
@@ -75,9 +93,6 @@ bool Reader::Extract_File_With_Buffer(const QString &filePathInArchive, const QS
 }
 
 bool Reader::Extract_Directory(const QString &directoryPathInArchive, const QString &destination) {
-    assert(this->file);
-    assert(this->file->isOpen() && this->file->isReadable());
-
     //Create a folder to extract the files into
     QDir dir(destination);
     if (!dir.exists() && !dir.mkdir(destination + "/" + (this->Get_File_Name_From_Path(directoryPathInArchive)))) return false;
@@ -98,9 +113,6 @@ bool Reader::Extract_Directory(const QString &directoryPathInArchive, const QStr
 }
 
 bool Reader::Is_Archive_Valid() {
-    assert(this->file);
-    assert(this->file->isOpen() && this->file->isReadable());
-
     //Read the header to determine if the archive is valid
     if (!this->file->seek(0)) return false;
     QByteArray headerBuffer = this->file->read(Common_Strings::FORMAT_NAME.length());
@@ -116,7 +128,6 @@ bool Reader::Is_Archive_Valid() {
 
     //Check to see if the end byte is in the header
     if (this->scrambler) this->scrambler->Unscramble(headerEndByteBuffer, Common_Strings::FORMAT_NAME.length());
-    if (static_cast<unsigned char>(headerEndByteBuffer.data()[0]) != Common_Data::END_SECTION) return false;
 
     return true; //the archive appears to be a valid sequential archive!
 }
@@ -136,6 +147,21 @@ bool Reader::Read_Scramble_Key(unsigned char &scrambleKey) {
     return true;
 }
 
+QStringList Reader::Read_Index_Table_Names(qint64 offset) {
+    QByteArray nameBuffer = this->Read_Bytes(offset+8, this->Read_qint64(offset));
+    QStringList nameList;
+    for (int i = 0; i < nameBuffer.size();) {
+        int nameLength = this->Read_int(nameBuffer, i);
+        QString name = "";
+        for (int j = 0; j < nameLength; ++j) {
+            name += nameBuffer.at(i+j);
+        }
+        nameList.append(name);
+        i += nameLength + 16;
+    }
+    return nameList;
+}
+
 qint64 Reader::Read_qint64(qint64 offset) {
     QByteArray buffer = this->Read_Bytes(offset, 8);
     if (buffer.isEmpty()) return -1; //we're only using positive numbers (signed to make the libraries happy), so return -1 on error
@@ -146,11 +172,41 @@ qint64 Reader::Read_qint64(qint64 offset) {
     return number;
 }
 
+qint64 Reader::Read_qint64(const QByteArray &buffer, int offset) {
+    if (buffer.size() < offset+8) return false;
+    int number = 0;
+    for (int i = 0; i < 8; ++i) {
+        number += static_cast<int>(static_cast<unsigned char>(buffer.data()[i]));
+    }
+    return number;
+}
+
+int Reader::Read_int(qint64 offset) {
+    QByteArray buffer = this->Read_Bytes(offset, 4);
+    if (buffer.isEmpty()) return -1; //we're only using positive numbers (signed to make the libraries happy), so return -1 on error
+    int number = 0;
+    for (int i = 0; i < 4; ++i) {
+        number += static_cast<int>(static_cast<unsigned char>(buffer.data()[i]));
+    }
+    return number;
+}
+
+qint64 Reader::Read_int(const QByteArray &buffer, int offset) {
+    if (buffer.size() < offset+4) return false;
+    int number = 0;
+    for (int i = 0; i < 4; ++i) {
+        number += static_cast<int>(static_cast<unsigned char>(buffer.data()[i]));
+    }
+    return number;
+}
+
 QString Reader::Get_File_Name_From_Path(const QString &path) {
     return path.split('/').last();
 }
 
 QByteArray Reader::Read_Bytes(qint64 offset, qint64 size) {
+    assert(this->file);
+    assert(this->file->isOpen() && this->file->isReadable());
     if (!this->file->seek(offset)) return QByteArray();
 
     //Read the bytes from the archive
@@ -161,27 +217,3 @@ QByteArray Reader::Read_Bytes(qint64 offset, qint64 size) {
     if (this->scrambler) this->scrambler->Unscramble(buffer, offset);
     return buffer;
 }
-
-//Avoid using this function unless absolutely necessary!
-//I may remove this later if it is not needed
-QByteArray Reader::Read_Until_End_Byte(qint64 offset) {
-    if (!this->file->seek(offset)) return QByteArray();
-
-    //We are using a QString here as its append is constant time
-    //QByteArray's append is linear time, which we want to avoid
-    QString byteList = "";
-
-    //Read into the byteList until either the end byte is found or we are at the end of the file
-    while (true) {
-        if (this->file->atEnd()) break;
-        QByteArray buffer = this->file->read(1);
-        if (buffer.isEmpty()) break;
-        if (this->scrambler) this->scrambler->Unscramble(buffer, offset);
-        if (static_cast<unsigned char>(buffer.data()[0]) == Common_Data::END_SECTION) break;
-        byteList.append(buffer.data()[0]);
-        ++offset;
-    }
-
-    return QByteArray(byteList.toUtf8().data());
-}
-

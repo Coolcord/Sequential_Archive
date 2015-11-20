@@ -54,8 +54,12 @@ int Packer::Pack(const QString &sourceFolderLocation, const QString &destination
 }
 
 bool Packer::Write_Archive_Header(QFile &file, const QFileInfo &sourceFolderInfo) {
-    QString header = Common_Strings::FORMAT_NAME + this->Get_Byte_Array_From_Number(Common_Strings::FORMAT_NAME.length()+17+sourceFolderInfo.fileName().length()) +
-            this->Get_Byte_Array_From_Number(this->Get_Index_Table_Size(sourceFolderInfo.filePath())) + sourceFolderInfo.fileName();
+    //Sequential Archive
+    //Root Index Offset
+    //File Name
+    QString header = Common_Strings::FORMAT_NAME +
+            this->Get_Byte_Array_From_qint64(Common_Strings::FORMAT_NAME.length()+17+sourceFolderInfo.fileName().length()) +
+            sourceFolderInfo.fileName();
     return this->Write_Buffer_To_File(file, header, 0);
 }
 
@@ -63,11 +67,18 @@ bool Packer::Pack_Directory(QFile &file, const QString &sourceFolderLocation) {
     QDir dir(sourceFolderLocation);
     assert(dir.count() > 0); //empty folders should never enter this function
 
+    //Allocate space for the length of the directory names
+    qint64 startingOffset = file.size();
+    if (!this->Write_Buffer_To_File(file, QByteArray(8, ' '))) return false;
+
     //Create a table entry for each directory
     QFileInfoList directories = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
     QHash<QString, qint64> directoryTable;
     foreach (QFileInfo sourceDirectory, directories) {
         if (sourceDirectory.dir().count() == 0) continue; //we won't pack empty folders
+
+        //Write the length of the directory name
+        if (!this->Write_Buffer_To_File(file, this->Get_Byte_Array_From_int(sourceDirectory.fileName().size()))) return false;
 
         //Insert the directory into the hash to update it later
         directoryTable.insert(sourceDirectory.fileName(), file.size());
@@ -76,13 +87,19 @@ bool Packer::Pack_Directory(QFile &file, const QString &sourceFolderLocation) {
         if (!this->Write_Buffer_To_File(file, QByteArray(16, ' '))) return false;
         if (!this->Write_Buffer_To_File(file, sourceDirectory.fileName())) return false;
     }
-    QByteArray endByte(1, static_cast<char>(Common_Data::END_SECTION));
-    if (!this->Write_Buffer_To_File(file, endByte)) return false;
+    if (!this->Write_Buffer_To_File(file, this->Get_Byte_Array_From_qint64(file.size()-startingOffset), startingOffset)) return false;
+
+    //Allocate space for the length of the file names
+    startingOffset = file.size();
+    if (!this->Write_Buffer_To_File(file, QByteArray(8, ' '))) return false;
 
     //Create a table entry for each file
     QFileInfoList files = dir.entryInfoList(QDir::Files);
     QHash<QString, qint64> fileTable;
     foreach (QFileInfo sourceFile, files) {
+        //Write the length of the filename
+        if (!this->Write_Buffer_To_File(file, this->Get_Byte_Array_From_int(sourceFile.fileName().size()))) return false;
+
         //Insert the file into the hash to update it later
         fileTable.insert(sourceFile.fileName(),file.size());
 
@@ -90,7 +107,7 @@ bool Packer::Pack_Directory(QFile &file, const QString &sourceFolderLocation) {
         if (!this->Write_Buffer_To_File(file, QByteArray(16, ' '))) return false;
         if (!this->Write_Buffer_To_File(file, sourceFile.fileName())) return false;
     }
-    if (!this->Write_Buffer_To_File(file, endByte)) return false;
+    if (!this->Write_Buffer_To_File(file, this->Get_Byte_Array_From_qint64(file.size()-startingOffset), startingOffset)) return false;
 
     //Pack each file. Update the table entry for each file along the way
     foreach (QFileInfo sourceFile, files) {
@@ -98,7 +115,7 @@ bool Packer::Pack_Directory(QFile &file, const QString &sourceFolderLocation) {
         if (!this->Pack_File(file, sourceFile.filePath())) return false;
 
         //Update the table entry with the new pointers
-        if (!this->Write_Buffer_To_File(file, this->Get_Byte_Array_From_Number(startByte)+this->Get_Byte_Array_From_Number(this->Get_Index_Table_Size(sourceFile.filePath())), fileTable.value(sourceFile.fileName()))) return false;
+        if (!this->Write_Buffer_To_File(file, this->Get_Byte_Array_From_qint64(startByte)+this->Get_Byte_Array_From_qint64(sourceFile.size()), fileTable.value(sourceFile.fileName()))) return false;
     }
 
     //Pack every subdirectory
@@ -109,7 +126,7 @@ bool Packer::Pack_Directory(QFile &file, const QString &sourceFolderLocation) {
         if (!this->Pack_Directory(file, sourceDirectory.filePath())) return false;
 
         //Update the table entry with the new pointers
-        if (!this->Write_Buffer_To_File(file, this->Get_Byte_Array_From_Number(startByte)+this->Get_Byte_Array_From_Number(this->Get_Index_Table_Size(sourceDirectory.filePath())), directoryTable.value(sourceDirectory.fileName()))) return false;
+        if (!this->Write_Buffer_To_File(file, this->Get_Byte_Array_From_qint64(startByte), directoryTable.value(sourceDirectory.fileName()))) return false;
     }
 
     return true;
@@ -139,20 +156,7 @@ bool Packer::Pack_File_With_Buffers(QFile &file, QFile &sourceFile, qint64 fileS
     return true;
 }
 
-qint64 Packer::Get_Index_Table_Size(const QString &sourceFolderLocation) {
-    QDir dir = QDir(sourceFolderLocation);
-    assert(dir.exists());
-    qint64 indexTableSize = 0;
-
-    //Add the size of the index table using the filenames in the folder
-    foreach (QFileInfo entry, QDir(sourceFolderLocation).entryInfoList(QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot)) {
-        indexTableSize += 16; //start pointer and size
-        indexTableSize += entry.fileName().length();
-    }
-    return indexTableSize;
-}
-
-QByteArray Packer::Get_Byte_Array_From_Number(qint64 number) {
+QByteArray Packer::Get_Byte_Array_From_qint64(qint64 number) {
     QByteArray byteArray(8, ' ');
     byteArray.data()[0] = static_cast<char>(static_cast<unsigned char>(((number&0xFF00000000000000)>>38)&0xFF));
     byteArray.data()[1] = static_cast<char>(static_cast<unsigned char>((number&0x00FF000000000000)>>30));
@@ -162,6 +166,15 @@ QByteArray Packer::Get_Byte_Array_From_Number(qint64 number) {
     byteArray.data()[5] = static_cast<char>(static_cast<unsigned char>((number&0x0000000000FF0000)>>10));
     byteArray.data()[6] = static_cast<char>(static_cast<unsigned char>((number&0x000000000000FF00)>>8));
     byteArray.data()[7] = static_cast<char>(static_cast<unsigned char>((number&0x00000000000000FF)));
+    return byteArray;
+}
+
+QByteArray Packer::Get_Byte_Array_From_int(int number) {
+    QByteArray byteArray(4, ' ');
+    byteArray.data()[0] = static_cast<char>(static_cast<unsigned char>(((number&0xFF000000)>>18)&0xFF));
+    byteArray.data()[1] = static_cast<char>(static_cast<unsigned char>((number&0x00FF0000)>>10));
+    byteArray.data()[2] = static_cast<char>(static_cast<unsigned char>((number&0x0000FF00)>>8));
+    byteArray.data()[3] = static_cast<char>(static_cast<unsigned char>((number&0x000000FF)));
     return byteArray;
 }
 
