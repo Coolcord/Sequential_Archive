@@ -42,11 +42,18 @@ QString Reader::Get_Archive_Name() {
 }
 
 bool Reader::Change_Directory(const QString &directory) {
-
+    if (directory.contains('/')) {
+        foreach (QString dir, directory.split('/')) {
+            if (!this->Change_Local_Directory(dir)) return false;
+        }
+        return true;
+    } else {
+        return this->Change_Local_Directory(directory);
+    }
 }
 
 QStringList Reader::Get_Directories() {
-    return this->Read_Index_Table_Names(this->currentDirectoryOffset);
+    return this->Read_Index_Table_Names(this->currentDirectoryOffset, false);
 }
 
 QStringList Reader::Get_Directories(const QString &pathInArchive) {
@@ -60,7 +67,7 @@ QStringList Reader::Get_Directories(const QString &pathInArchive) {
 }
 
 QStringList Reader::Get_Files() {
-    return this->Read_Index_Table_Names(this->Read_qint64(this->currentDirectoryOffset)+this->currentDirectoryOffset);
+    return this->Read_Index_Table_Names(this->Read_qint64(this->currentDirectoryOffset)+this->currentDirectoryOffset, true);
 }
 
 QStringList Reader::Get_Files(const QString &pathInArchive) {
@@ -74,16 +81,10 @@ QStringList Reader::Get_Files(const QString &pathInArchive) {
 }
 
 QByteArray Reader::Read_File(const QString &filePathInArchive) {
-    assert(this->file);
-    assert(this->file->isOpen() && this->file->isReadable());
-
     //TODO: Write this...
 }
 
 bool Reader::Extract_File(const QString &filePathInArchive, const QString &destination) {
-    assert(this->file);
-    assert(this->file->isOpen() && this->file->isReadable());
-
     //TODO: Write this...
 }
 
@@ -132,6 +133,27 @@ bool Reader::Is_Archive_Valid() {
     return true; //the archive appears to be a valid sequential archive!
 }
 
+bool Reader::Change_Local_Directory(const QString &directory) {
+    QByteArray nameBuffer = this->Read_Bytes(this->currentDirectoryOffset+8, this->Read_qint64(this->currentDirectoryOffset));
+    for (int i = 0; i < nameBuffer.size();) {
+        int nameLength = this->Read_int(nameBuffer, i);
+        QString name = "";
+        for (int j = 0; j < nameLength; ++j) {
+            name += nameBuffer.at(i+j);
+        }
+        i += nameLength;
+
+        //If this is the directory in question, change to it!
+        if (name == directory) {
+            this->currentDirectoryOffset = this->Read_qint64(nameBuffer, i);
+            this->currentPath += "/" + directory;
+            return true;
+        }
+        i += 8;
+    }
+    return false;
+}
+
 bool Reader::Read_Scramble_Key(unsigned char &scrambleKey) {
     assert(this->file);
     assert(this->file->isOpen() && this->file->isReadable());
@@ -147,7 +169,7 @@ bool Reader::Read_Scramble_Key(unsigned char &scrambleKey) {
     return true;
 }
 
-QStringList Reader::Read_Index_Table_Names(qint64 offset) {
+QStringList Reader::Read_Index_Table_Names(qint64 offset, bool fileMode) {
     QByteArray nameBuffer = this->Read_Bytes(offset+8, this->Read_qint64(offset));
     QStringList nameList;
     for (int i = 0; i < nameBuffer.size();) {
@@ -157,7 +179,8 @@ QStringList Reader::Read_Index_Table_Names(qint64 offset) {
             name += nameBuffer.at(i+j);
         }
         nameList.append(name);
-        i += nameLength + 16;
+        i += nameLength + 8; //skip past the starting offset
+        if (fileMode) i += 8; //files have a size as well, so skip that if necessary
     }
     return nameList;
 }
