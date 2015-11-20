@@ -30,6 +30,7 @@ private:
     bool Extract_File_With_Buffer(const QString &filePathInArchive, const QString &destination);
     bool Is_Archive_Valid();
     bool Change_Local_Directory(const QString &directory);
+    bool Change_To_Directory_Containing_File(const QString &filePathInArchive);
     bool Read_Scramble_Key(unsigned char &scrambleKey);
     QStringList Read_Index_Table_Names(qint64 offset, bool fileMode);
     qint64 Read_qint64(qint64 offset);

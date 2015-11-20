@@ -81,7 +81,32 @@ QStringList Reader::Get_Files(const QString &pathInArchive) {
 }
 
 QByteArray Reader::Read_File(const QString &filePathInArchive) {
-    //TODO: Write this...
+    //Change to the folder in question first if specified
+    if (filePathInArchive.endsWith("/")) return QByteArray();
+    QString fileName = filePathInArchive;
+    if (filePathInArchive.contains('/')) {
+        if (!this->Change_To_Directory_Containing_File(filePathInArchive)) return QByteArray();
+        fileName = filePathInArchive.split('/').last();
+    }
+
+    //Scan through the file index to get the offset of the file in question
+    qint64 fileIndexOffset = this->Read_qint64(this->currentDirectoryOffset) + this->currentDirectoryOffset;
+    QByteArray nameBuffer = this->Read_Bytes(fileIndexOffset+8, this->Read_qint64(fileIndexOffset));
+    for (int i = 0; i < nameBuffer.size();) {
+        int nameLength = this->Read_int(nameBuffer, i);
+        QString name = "";
+        for (int j = 0; j < nameLength; ++j) {
+            name += nameBuffer.at(i+j);
+        }
+        i += nameLength;
+
+        //If this is the file in question, read it into a buffer!
+        if (name == fileName) {
+            return this->Read_Bytes(this->Read_qint64(nameBuffer, i), this->Read_qint64(nameBuffer, i+8));
+        }
+        i += 16;
+    }
+    return QByteArray();
 }
 
 bool Reader::Extract_File(const QString &filePathInArchive, const QString &destination) {
@@ -146,6 +171,16 @@ bool Reader::Change_Local_Directory(const QString &directory) {
         i += 8;
     }
     return false;
+}
+
+bool Reader::Change_To_Directory_Containing_File(const QString &filePathInArchive) {
+    assert(filePathInArchive.contains('/'));
+    QStringList directories = filePathInArchive.split('/');
+    QString path = "/";
+    for (QStringList::iterator iter = directories.begin(); iter+1 != directories.end(); ++iter) {
+        path += *iter + "/";
+    }
+    return this->Change_Directory(path);
 }
 
 bool Reader::Read_Scramble_Key(unsigned char &scrambleKey) {
