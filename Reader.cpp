@@ -33,9 +33,12 @@ QString Reader::Get_Archive_Name() {
     assert(this->file->isOpen() && this->file->isReadable());
 
     //Read the starting offset of the root table
-    if (!this->file->seek(Common_Strings::FORMAT_NAME.length())) return false;
-    //TODO: Write this...
-    //this->Read_Bytes(Common_Strings::FORMAT_NAME.length(), 8);
+    qint64 rootTableOffset = this->Read_qint64(Common_Strings::FORMAT_NAME.length());
+    if (rootTableOffset == -1) return QString();
+    qint64 nameOffset = Common_Strings::FORMAT_NAME.length()+16;
+
+    //Now, using the starting offset, read the name
+    return QString(this->Read_Bytes(nameOffset, rootTableOffset-nameOffset));
 }
 
 QStringList Reader::Get_Directories(const QString &pathInArchive) {
@@ -130,6 +133,16 @@ bool Reader::Read_Scramble_Key(unsigned char &scrambleKey) {
     //Save the scramble key to memory
     scrambleKey = static_cast<unsigned char>(scrambleKeyBuffer.data()[0]);
     return true;
+}
+
+qint64 Reader::Read_qint64(qint64 offset) {
+    QByteArray buffer = this->Read_Bytes(offset, 8);
+    if (buffer.isEmpty()) return -1; //we're only using positive numbers (signed to make the libraries happy), so return -1 on error
+    qint64 number = 0;
+    for (int i = 0; i < 8; ++i) {
+        number += static_cast<int>(static_cast<unsigned char>(buffer.data()[i]));
+    }
+    return number;
 }
 
 QString Reader::Get_File_Name_From_Path(const QString &path) {

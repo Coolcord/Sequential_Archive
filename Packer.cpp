@@ -55,7 +55,7 @@ int Packer::Pack(const QString &sourceFolderLocation, const QString &destination
 
 bool Packer::Write_Archive_Header(QFile &file, const QFileInfo &sourceFolderInfo) {
     QString header = Common_Strings::FORMAT_NAME + this->Get_Byte_Array_From_Number(Common_Strings::FORMAT_NAME.length()+17+sourceFolderInfo.fileName().length()) +
-            this->Get_Byte_Array_From_Number(this->Get_Index_Table_Size(sourceFolderInfo.filePath())) + sourceFolderInfo.fileName() + static_cast<char>(Common_Data::END_SECTION);
+            this->Get_Byte_Array_From_Number(this->Get_Index_Table_Size(sourceFolderInfo.filePath())) + sourceFolderInfo.fileName();
     return this->Write_Buffer_To_File(file, header, 0);
 }
 
