@@ -23,7 +23,7 @@ Reader::~Reader() {
 bool Reader::Open() {
     if (!this->file->open(QFile::ReadOnly)) return false;
     if (!this->Is_Archive_Valid()) return false;
-    if (!this->Change_Directory("/")) return false;
+    if (!this->Change_To_Root_Directory()) return false;
     return true;
 }
 
@@ -43,6 +43,7 @@ QString Reader::Get_Archive_Name() {
 
 bool Reader::Change_Directory(const QString &directory) {
     if (directory.contains('/')) {
+        if (!this->Change_To_Root_Directory()) return false;
         foreach (QString dir, directory.split('/')) {
             if (!this->Change_Local_Directory(dir)) return false;
         }
@@ -177,7 +178,11 @@ bool Reader::Change_Local_Directory(const QString &directory) {
         //If this is the directory in question, change to it!
         if (name == directory) {
             this->currentDirectoryOffset = this->Read_qint64(nameBuffer, i);
-            this->currentPath += "/" + directory;
+            if (this->currentPath == "/") {
+                this->currentPath += directory;
+            } else {
+                this->currentPath += "/" + directory;
+            }
             return true;
         }
         i += 8;
@@ -187,8 +192,20 @@ bool Reader::Change_Local_Directory(const QString &directory) {
 
 bool Reader::Change_To_Directory_Containing_File(const QString &filePathInArchive) {
     assert(filePathInArchive.contains('/'));
+    if (!this->Change_To_Root_Directory()) return false;
     QFileInfo filePathInfo(filePathInArchive);
     return this->Change_Directory(filePathInfo.path());
+}
+
+bool Reader::Change_To_Root_Directory() {
+    qint64 rootOffset = this->Read_qint64(Common_Strings::FORMAT_NAME.length());
+    if (rootOffset == -1) {
+        return false;
+    } else {
+        this->currentDirectoryOffset = rootOffset;
+        this->currentPath = "/";
+        return true;
+    }
 }
 
 bool Reader::Read_Scramble_Key(unsigned char &scrambleKey) {

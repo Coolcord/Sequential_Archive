@@ -31,6 +31,7 @@ private:
     bool Is_Archive_Valid();
     bool Change_Local_Directory(const QString &directory);
     bool Change_To_Directory_Containing_File(const QString &filePathInArchive);
+    bool Change_To_Root_Directory();
     bool Read_Scramble_Key(unsigned char &scrambleKey);
     QStringList Read_Index_Table_Names(qint64 offset, bool fileMode);
     qint64 Read_qint64(qint64 offset);
