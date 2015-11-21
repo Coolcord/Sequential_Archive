@@ -42,28 +42,36 @@ int Sequential_Archive::Pack(const QString &sourceFolder, const QString &destina
 
 int Sequential_Archive::Unpack(const QString &sourceArchive) {
     if (!this->Open(sourceArchive)) return 1;
+    if (!this->reader->Extract_Directory(sourceArchive, this->Get_Folder_From_Archive_Path(sourceArchive))) return 2;
+    else return 0;
 }
 
 int Sequential_Archive::Unpack(const QString &sourceArchive, const QString &destinationFolder) {
-
+    if (!this->Open(sourceArchive)) return 1;
+    if (!this->reader->Extract_Directory("/", destinationFolder)) return 2;
+    else return 0;
 }
 
 int Sequential_Archive::Unpack(const QString &sourceArchive, unsigned char scrambleKey) {
-
+    if (!this->Open(sourceArchive, scrambleKey)) return 1;
+    if (!this->reader->Extract_Directory(sourceArchive, this->Get_Folder_From_Archive_Path(sourceArchive))) return 2;
+    else return 0;
 }
 
-int Sequential_Archive::Unpack(const QString &archive, const QString &destinationFolder, unsigned char scrambleKey) {
-
+int Sequential_Archive::Unpack(const QString &sourceArchive, const QString &destinationFolder, unsigned char scrambleKey) {
+    if (!this->Open(sourceArchive, scrambleKey)) return 1;
+    if (!this->reader->Extract_Directory("/", destinationFolder)) return 2;
+    else return 0;
 }
 
 bool Sequential_Archive::Open(const QString &archive) {
-    delete this->reader;
+    this->Close();
     this->reader = new Reader(archive);
     return this->reader->Open();
 }
 
 bool Sequential_Archive::Open(const QString &archive, unsigned char scrambleKey) {
-    delete this->reader;
+    this->Close();
     this->reader = new Reader(archive, scrambleKey);
     return this->reader->Open();
 }
@@ -120,14 +128,11 @@ bool Sequential_Archive::Extract_Directory(const QString &directoryPathInArchive
 }
 
 QString Sequential_Archive::Get_Archive_Name_From_Source_Folder(const QString &sourceFolder) {
-    QFileInfo directoryInfo(sourceFolder);
-    return (directoryInfo.path() + directoryInfo.fileName() + "." + Common_Strings::EXTENSION);
+    return sourceFolder + "." + Common_Strings::EXTENSION;
 }
 
 QString Sequential_Archive::Get_Folder_From_Archive_Path(const QString &archivePath) {
-    //QFileInfo directoryInfo(archivePath);
-    //QString folder = directoryInfo.path();
-    //TODO: Write this...
-
+    QFileInfo archivePathInfo(archivePath);
+    return archivePathInfo.path() + "/" + archivePathInfo.baseName();
 }
 

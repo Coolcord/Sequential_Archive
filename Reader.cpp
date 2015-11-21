@@ -83,7 +83,7 @@ QStringList Reader::Get_Files(const QString &pathInArchive) {
 QByteArray Reader::Read_File(const QString &filePathInArchive) {
     qint64 offset = 0;
     qint64 size = 0;
-    if (!this->Get_File_Offset_And_Size(filePathInArchive, offset, size)) return false;
+    if (!this->Get_File_Offset_And_Size(filePathInArchive, offset, size)) return QByteArray();
     return this->Read_Bytes(offset, size);
 }
 
@@ -187,12 +187,8 @@ bool Reader::Change_Local_Directory(const QString &directory) {
 
 bool Reader::Change_To_Directory_Containing_File(const QString &filePathInArchive) {
     assert(filePathInArchive.contains('/'));
-    QStringList directories = filePathInArchive.split('/');
-    QString path = "/";
-    for (QStringList::iterator iter = directories.begin(); iter+1 != directories.end(); ++iter) {
-        path += *iter + "/";
-    }
-    return this->Change_Directory(path);
+    QFileInfo filePathInfo(filePathInArchive);
+    return this->Change_Directory(filePathInfo.path());
 }
 
 bool Reader::Read_Scramble_Key(unsigned char &scrambleKey) {
