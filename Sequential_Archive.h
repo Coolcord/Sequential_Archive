@@ -6,6 +6,8 @@
 #include <QTextStream>
 #include <QString>
 
+class Reader;
+
 class Sequential_Archive : public Sequential_Archive_Interface {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID  "Sequential_Archive_Interface")
@@ -26,9 +28,27 @@ public:
     int Unpack(const QString &sourceArchive, unsigned char scrambleKey);
     int Unpack(const QString &sourceArchive, const QString &destinationFolder, unsigned char scrambleKey);
 
+    //Reader Functions
+    bool Open(const QString &archive);
+    bool Open(const QString &archive, unsigned char scrambleKey);
+    void Close();
+    QString Get_Archive_Name();
+    bool Change_Directory(const QString &directory);
+    QStringList Get_Directories();
+    QStringList Get_Directories(const QString &pathInArchive);
+    QStringList Get_Files();
+    QStringList Get_Files(const QString &pathInArchive);
+    QByteArray Read_File(const QString &filePathInArchive);
+    bool Extract_File(const QString &filePathInArchive, const QString &destination);
+    bool Extract_Directory(const QString &directoryPathInArchive, const QString &destination);
+
 private:
+    QString Get_Archive_Name_From_Source_Folder(const QString &sourceFolder);
+    QString Get_Folder_From_Archive_Path(const QString &archivePath);
+
     QString applicationLocation;
     QWidget *parent;
+    Reader *reader;
 };
 
 #endif // SEQUENTIAL_ARCHIVE_H

@@ -12,7 +12,6 @@ class Packer
 {
 public:
     Packer();
-    Packer(bool scramble);
     Packer(unsigned char scrambleKey);
     ~Packer();
     int Pack(const QString &sourceFolderLocation, const QString &destinationArchiveLocation);
