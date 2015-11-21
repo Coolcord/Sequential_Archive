@@ -6,6 +6,7 @@
 #include <QTime>
 
 Sequential_Archive::Sequential_Archive() {
+    this->reader = NULL;
     this->parent = NULL;
     this->applicationLocation = QString();
 }

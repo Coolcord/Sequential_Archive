@@ -7,6 +7,8 @@
 #include <QHash>
 #include <assert.h>
 
+#include <QDebug>
+
 Packer::Packer() {
     this->scrambler = new Scrambler(static_cast<unsigned char>(qrand()%0x100));
 }
@@ -31,7 +33,7 @@ int Packer::Pack(const QString &sourceFolderLocation, const QString &destination
 
     //Create the archive file and write the header
     QFile file(destinationArchiveLocation);
-    if (file.open(QFile::ReadWrite | QFile::Truncate)) return 3; //unable to create the archive file
+    if (!file.open(QFile::ReadWrite | QFile::Truncate)) return 3; //unable to create the archive file
     if (!this->Write_Archive_Header(file, folderInfo)) return 4; //unable to write the archive file header
 
     //Pack all of the files
@@ -128,7 +130,6 @@ bool Packer::Pack_Directory(QFile &file, const QString &sourceFolderLocation) {
 bool Packer::Pack_File(QFile &file, const QString &sourceFileLocation) {
     QFile sourceFile(sourceFileLocation);
     if (!sourceFile.open(QFile::ReadOnly)) return false;
-    assert(file.pos() == file.size());
 
     //Determine if the entire file can fit into one buffer
     qint64 fileSize = sourceFile.size();

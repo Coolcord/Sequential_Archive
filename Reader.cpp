@@ -28,7 +28,7 @@ bool Reader::Open() {
 }
 
 void Reader::Close() {
-    this->file->close();
+    if (this->file) this->file->close();
 }
 
 QString Reader::Get_Archive_Name() {
@@ -43,7 +43,7 @@ QString Reader::Get_Archive_Name() {
 
 bool Reader::Change_Directory(const QString &directory) {
     if (directory.contains('/')) {
-        if (!this->Change_To_Root_Directory()) return false;
+        if (directory.startsWith('/') && !this->Change_To_Root_Directory()) return false;
         foreach (QString dir, directory.split('/')) {
             if (!this->Change_Local_Directory(dir)) return false;
         }
@@ -166,6 +166,7 @@ bool Reader::Is_Archive_Valid() {
 }
 
 bool Reader::Change_Local_Directory(const QString &directory) {
+    if (directory.isEmpty()) return true; //base case
     QByteArray nameBuffer = this->Read_Bytes(this->currentDirectoryOffset+8, this->Read_qint64(this->currentDirectoryOffset));
     for (int i = 0; i < nameBuffer.size();) {
         int nameLength = this->Read_int(nameBuffer, i);
@@ -192,7 +193,6 @@ bool Reader::Change_Local_Directory(const QString &directory) {
 
 bool Reader::Change_To_Directory_Containing_File(const QString &filePathInArchive) {
     assert(filePathInArchive.contains('/'));
-    if (!this->Change_To_Root_Directory()) return false;
     QFileInfo filePathInfo(filePathInArchive);
     return this->Change_Directory(filePathInfo.path());
 }
@@ -291,6 +291,7 @@ bool Reader::Get_File_Offset_And_Size(const QString &filePathInArchive, qint64 &
 
     //Scan through the file index to get the offset of the file in question
     qint64 fileIndexOffset = this->Read_qint64(this->currentDirectoryOffset) + this->currentDirectoryOffset;
+    qint64 length = this->Read_qint64(fileIndexOffset);
     QByteArray nameBuffer = this->Read_Bytes(fileIndexOffset+8, this->Read_qint64(fileIndexOffset));
     for (int i = 0; i < nameBuffer.size();) {
         int nameLength = this->Read_int(nameBuffer, i);
@@ -314,6 +315,7 @@ bool Reader::Get_File_Offset_And_Size(const QString &filePathInArchive, qint64 &
 QByteArray Reader::Read_Bytes(qint64 offset, qint64 size) {
     assert(this->file);
     assert(this->file->isOpen() && this->file->isReadable());
+    assert(this->file->size() <= offset+size);
     if (!this->file->seek(offset)) return QByteArray();
 
     //Read the bytes from the archive
