@@ -34,11 +34,11 @@ int Sequential_Archive::Pack(const QString &sourceFolder, const QString &destina
     return packer.Pack(sourceFolder, destinationArchive);
 }
 
-int Sequential_Archive::PackAndScramble(const QString &sourceFolder, unsigned char scrambleKey) {
+int Sequential_Archive::Pack(const QString &sourceFolder, unsigned char scrambleKey) {
 
 }
 
-int Sequential_Archive::PackAndScramble(const QString &sourceFolder, const QString &destinationArchive, unsigned char scrambleKey) {
+int Sequential_Archive::Pack(const QString &sourceFolder, const QString &destinationArchive, unsigned char scrambleKey) {
 
 }
 
@@ -50,11 +50,11 @@ int Sequential_Archive::Unpack(const QString &sourceArchive, const QString &dest
 
 }
 
-int Sequential_Archive::UnscrambleAndUnpack(const QString &sourceArchive, unsigned char scrambleKey) {
+int Sequential_Archive::Unpack(const QString &sourceArchive, unsigned char scrambleKey) {
 
 }
 
-int Sequential_Archive::UnscrambleAndUnpack(const QString &archive, const QString &destinationFolder, unsigned char scrambleKey) {
+int Sequential_Archive::Unpack(const QString &archive, const QString &destinationFolder, unsigned char scrambleKey) {
 
 }
 
