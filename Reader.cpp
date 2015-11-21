@@ -81,41 +81,53 @@ QStringList Reader::Get_Files(const QString &pathInArchive) {
 }
 
 QByteArray Reader::Read_File(const QString &filePathInArchive) {
-    //Change to the folder in question first if specified
-    if (filePathInArchive.endsWith("/")) return QByteArray();
-    QString fileName = filePathInArchive;
-    if (filePathInArchive.contains('/')) {
-        if (!this->Change_To_Directory_Containing_File(filePathInArchive)) return QByteArray();
-        fileName = filePathInArchive.split('/').last();
-    }
-
-    //Scan through the file index to get the offset of the file in question
-    qint64 fileIndexOffset = this->Read_qint64(this->currentDirectoryOffset) + this->currentDirectoryOffset;
-    QByteArray nameBuffer = this->Read_Bytes(fileIndexOffset+8, this->Read_qint64(fileIndexOffset));
-    for (int i = 0; i < nameBuffer.size();) {
-        int nameLength = this->Read_int(nameBuffer, i);
-        QString name = "";
-        for (int j = 0; j < nameLength; ++j) {
-            name += nameBuffer.at(i+j);
-        }
-        i += nameLength;
-
-        //If this is the file in question, read it into a buffer!
-        if (name == fileName) {
-            return this->Read_Bytes(this->Read_qint64(nameBuffer, i), this->Read_qint64(nameBuffer, i+8));
-        }
-        i += 16;
-    }
-    return QByteArray();
+    qint64 offset = 0;
+    qint64 size = 0;
+    if (!this->Get_File_Offset_And_Size(filePathInArchive, offset, size)) return false;
+    return this->Read_Bytes(offset, size);
 }
 
 bool Reader::Extract_File(const QString &filePathInArchive, const QString &destination) {
-    //TODO: Write this...
+    qint64 offset = 0;
+    qint64 size = 0;
+    if (!this->Get_File_Offset_And_Size(filePathInArchive, offset, size)) return false;
+    if (offset-size > Common_Data::MAX_BUFFER_SIZE) {
+        return this->Extract_File_With_Buffer(offset, size, destination);
+    } else {
+        QByteArray buffer = this->Read_Bytes(offset, size);
+        if (buffer.isEmpty()) return false;
+        QFile destinationFile(destination);
+        if (!destinationFile.open(QFile::ReadWrite | QFile::Truncate)) return false;
+        if (destinationFile.write(buffer) != buffer.size()) return false;
+        destinationFile.close();
+        return true;
+    }
 }
 
 
-bool Reader::Extract_File_With_Buffer(const QString &filePathInArchive, const QString &destination) {
-    //TODO: Write this...
+bool Reader::Extract_File_With_Buffer(qint64 offset, qint64 size, const QString &destination) {
+    QFile destinationFile(destination);
+    if (!destinationFile.open(QFile::ReadWrite | QFile::Truncate)) return false;
+    for (qint64 bytesRead = 0; bytesRead <= size;) {
+        //Determine how many bytes to read
+        qint64 bytesRemaining = size - bytesRead;
+        qint64 bytesToRead = 0;
+        if (bytesRemaining > Common_Data::MAX_BUFFER_SIZE) {
+            bytesToRead = Common_Data::MAX_BUFFER_SIZE;
+        } else {
+            bytesToRead = bytesRemaining;
+        }
+
+        //Read the bytes into a buffer and write them to disk
+        QByteArray buffer = this->Read_Bytes(offset+bytesRead, bytesToRead);
+        if (buffer.isEmpty()) return false;
+        if (destinationFile.write(buffer) != buffer.size()) {
+            destinationFile.remove(); //delete what was written as it is invalid
+            return false;
+        }
+    }
+    destinationFile.close();
+    return true;
 }
 
 bool Reader::Extract_Directory(const QString &directoryPathInArchive, const QString &destination) {
@@ -252,8 +264,38 @@ qint64 Reader::Read_int(const QByteArray &buffer, int offset) {
     return number;
 }
 
-QString Reader::Get_File_Name_From_Path(const QString &path) {
-    return path.split('/').last();
+QString Reader::Get_File_Name_From_Path(const QString &fileNameWithPath) {
+    return fileNameWithPath.split('/').last();
+}
+
+bool Reader::Get_File_Offset_And_Size(const QString &filePathInArchive, qint64 &offset, qint64 &size) {
+    //Change to the folder in question first if specified
+    if (filePathInArchive.endsWith("/")) return false;
+    QString fileName = this->Get_File_Name_From_Path(filePathInArchive);
+    if (filePathInArchive.contains('/')) {
+        if (!this->Change_To_Directory_Containing_File(filePathInArchive)) return false;
+    }
+
+    //Scan through the file index to get the offset of the file in question
+    qint64 fileIndexOffset = this->Read_qint64(this->currentDirectoryOffset) + this->currentDirectoryOffset;
+    QByteArray nameBuffer = this->Read_Bytes(fileIndexOffset+8, this->Read_qint64(fileIndexOffset));
+    for (int i = 0; i < nameBuffer.size();) {
+        int nameLength = this->Read_int(nameBuffer, i);
+        QString name = "";
+        for (int j = 0; j < nameLength; ++j) {
+            name += nameBuffer.at(i+j);
+        }
+        i += nameLength;
+
+        //If this is the file in question, read it into a buffer!
+        if (name == fileName) {
+            offset = this->Read_qint64(nameBuffer, i);
+            size = this->Read_qint64(nameBuffer, i+8);
+            return true;
+        }
+        i += 16;
+    }
+    return false;
 }
 
 QByteArray Reader::Read_Bytes(qint64 offset, qint64 size) {

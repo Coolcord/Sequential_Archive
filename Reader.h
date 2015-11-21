@@ -27,7 +27,7 @@ public:
     bool Extract_Directory(const QString &directoryPathInArchive, const QString &destination);
 
 private:
-    bool Extract_File_With_Buffer(const QString &filePathInArchive, const QString &destination);
+    bool Extract_File_With_Buffer(qint64 offset, qint64 size, const QString &destination);
     bool Is_Archive_Valid();
     bool Change_Local_Directory(const QString &directory);
     bool Change_To_Directory_Containing_File(const QString &filePathInArchive);
@@ -37,7 +37,8 @@ private:
     qint64 Read_qint64(const QByteArray &buffer, int offset);
     int Read_int(qint64 offset);
     qint64 Read_int(const QByteArray &buffer, int offset);
-    QString Get_File_Name_From_Path(const QString &currentPath);
+    QString Get_File_Name_From_Path(const QString &fileNameWithPath);
+    bool Get_File_Offset_And_Size(const QString &filePathInArchive, qint64 &offset, qint64 &size);
     QByteArray Read_Bytes(qint64 offset, qint64 size);
 
     QFile *file;
