@@ -79,8 +79,8 @@ bool Packer::Pack_Directory(QFile &file, const QString &sourceFolderLocation) {
         //Insert the directory into the hash to update it later
         directoryTable.insert(sourceDirectory.fileName(), file.size());
 
-        //Allocate 16 bytes for the start pointer and size value
-        if (!this->Write_Buffer_To_File(file, QByteArray(16, 0x00))) return false;
+        //Allocate 8 bytes for the start pointer and size value
+        if (!this->Write_Buffer_To_File(file, QByteArray(8, 0x00))) return false;
     }
     if (!this->Write_Buffer_To_File(file, this->Get_Byte_Array_From_qint64(file.size()-startingOffset), startingOffset)) return false;
 
