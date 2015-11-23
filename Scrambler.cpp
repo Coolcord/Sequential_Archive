@@ -10,14 +10,14 @@ unsigned char Scrambler::Get_Scramble_Key() {
 }
 
 void Scrambler::Scramble(QByteArray &buffer, qint64 offsetInFile) {
-    //return;
+    return;
     for (int i = 0; i < buffer.size(); ++i) {
         this->ScrambleByte(buffer, i, offsetInFile);
     }
 }
 
 void Scrambler::Unscramble(QByteArray &buffer, qint64 offsetInFile) {
-    //return;
+    return;
     for (int i = 0; i < buffer.size(); ++i) {
         this->UnscrambleByte(buffer, i, offsetInFile);
     }

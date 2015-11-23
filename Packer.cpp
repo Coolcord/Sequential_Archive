@@ -117,7 +117,7 @@ bool Packer::Pack_Directory(QFile &file, const QString &sourceFolderLocation) {
     foreach (QFileInfo sourceDirectory, directories) {
         if (sourceDirectory.dir().count() == 0) continue; //ignore empty folders
 
-        qint64 startByte = file.pos();
+        qint64 startByte = file.size();
         if (!this->Pack_Directory(file, sourceDirectory.filePath())) return false;
 
         //Update the table entry with the new pointers

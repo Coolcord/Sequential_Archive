@@ -68,13 +68,25 @@ int Sequential_Archive::Unpack(const QString &sourceArchive, const QString &dest
 bool Sequential_Archive::Open(const QString &archive) {
     this->Close();
     this->reader = new Reader(archive);
-    return this->reader->Open();
+    if (this->reader->Open()) {
+        return true;
+    } else {
+        delete this->reader;
+        this->reader = NULL;
+        return false;
+    }
 }
 
 bool Sequential_Archive::Open(const QString &archive, unsigned char scrambleKey) {
     this->Close();
     this->reader = new Reader(archive, scrambleKey);
-    return this->reader->Open();
+    if (this->reader->Open()) {
+        return true;
+    } else {
+        delete this->reader;
+        this->reader = NULL;
+        return false;
+    }
 }
 
 void Sequential_Archive::Close() {

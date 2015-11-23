@@ -166,9 +166,10 @@ bool Reader::Is_Archive_Valid() {
 
 bool Reader::Change_Local_Directory(const QString &directory) {
     if (directory.isEmpty()) return true; //base case
-    QByteArray nameBuffer = this->Read_Bytes(this->currentDirectoryOffset+8, this->Read_qint64(this->currentDirectoryOffset));
+    QByteArray nameBuffer = this->Read_Bytes(this->currentDirectoryOffset+8, this->Read_qint64(this->currentDirectoryOffset)-8);
     for (int i = 0; i < nameBuffer.size();) {
         int nameLength = this->Read_int(nameBuffer, i);
+        i += 4;
         QString name = "";
         for (int j = 0; j < nameLength; ++j) {
             name += nameBuffer.at(i+j);
@@ -213,7 +214,7 @@ bool Reader::Read_Scramble_Key(unsigned char &scrambleKey) {
     assert(!this->scrambler);
 
     //Read the key from the end of the file
-    if (!this->file->seek(this->file->size()-2)) return false;
+    if (!this->file->seek(this->file->size()-1)) return false;
     QByteArray scrambleKeyBuffer = this->file->read(1);
     if (scrambleKeyBuffer.isEmpty()) return false;
 
@@ -223,10 +224,11 @@ bool Reader::Read_Scramble_Key(unsigned char &scrambleKey) {
 }
 
 QStringList Reader::Read_Index_Table_Names(qint64 offset, bool fileMode) {
-    QByteArray nameBuffer = this->Read_Bytes(offset+8, this->Read_qint64(offset));
+    QByteArray nameBuffer = this->Read_Bytes(offset+8, this->Read_qint64(offset)-8);
     QStringList nameList;
     for (int i = 0; i < nameBuffer.size();) {
         int nameLength = this->Read_int(nameBuffer, i);
+        i += 4;
         QString name = "";
         for (int j = 0; j < nameLength; ++j) {
             name += nameBuffer.at(i+j);
@@ -241,38 +243,46 @@ QStringList Reader::Read_Index_Table_Names(qint64 offset, bool fileMode) {
 qint64 Reader::Read_qint64(qint64 offset) {
     QByteArray buffer = this->Read_Bytes(offset, 8);
     if (buffer.isEmpty()) return -1; //we're only using positive numbers (signed to make the libraries happy), so return -1 on error
-    qint64 number = 0;
-    for (int i = 0; i < 8; ++i) {
-        number += static_cast<int>(static_cast<unsigned char>(buffer.data()[i]));
-    }
+    qint64 number = static_cast<int>(static_cast<unsigned char>(buffer.data()[0]))*0x100000000000000;
+    number += static_cast<int>(static_cast<unsigned char>(buffer.data()[1]))*0x001000000000000;
+    number += static_cast<int>(static_cast<unsigned char>(buffer.data()[2]))*0x000010000000000;
+    number += static_cast<int>(static_cast<unsigned char>(buffer.data()[3]))*0x000000100000000;
+    number += static_cast<int>(static_cast<unsigned char>(buffer.data()[4]))*0x000000001000000;
+    number += static_cast<int>(static_cast<unsigned char>(buffer.data()[5]))*0x000000000010000;
+    number += static_cast<int>(static_cast<unsigned char>(buffer.data()[6]))*0x000000000000100;
+    number += static_cast<int>(static_cast<unsigned char>(buffer.data()[7]));
     return number;
 }
 
 qint64 Reader::Read_qint64(const QByteArray &buffer, int offset) {
     if (buffer.size() < offset+8) return false;
-    int number = 0;
-    for (int i = 0; i < 8; ++i) {
-        number += static_cast<int>(static_cast<unsigned char>(buffer.data()[offset+i]));
-    }
+    qint64 number = static_cast<int>(static_cast<unsigned char>(buffer.data()[offset]))*0x100000000000000;
+    number += static_cast<int>(static_cast<unsigned char>(buffer.data()[offset+1]))*0x001000000000000;
+    number += static_cast<int>(static_cast<unsigned char>(buffer.data()[offset+2]))*0x000010000000000;
+    number += static_cast<int>(static_cast<unsigned char>(buffer.data()[offset+3]))*0x000000100000000;
+    number += static_cast<int>(static_cast<unsigned char>(buffer.data()[offset+4]))*0x000000001000000;
+    number += static_cast<int>(static_cast<unsigned char>(buffer.data()[offset+5]))*0x000000000010000;
+    number += static_cast<int>(static_cast<unsigned char>(buffer.data()[offset+6]))*0x000000000000100;
+    number += static_cast<int>(static_cast<unsigned char>(buffer.data()[offset+7]));
     return number;
 }
 
 int Reader::Read_int(qint64 offset) {
     QByteArray buffer = this->Read_Bytes(offset, 4);
     if (buffer.isEmpty()) return -1; //we're only using positive numbers (signed to make the libraries happy), so return -1 on error
-    int number = 0;
-    for (int i = 0; i < 4; ++i) {
-        number += static_cast<int>(static_cast<unsigned char>(buffer.data()[i]));
-    }
+    int number = static_cast<int>(static_cast<unsigned char>(buffer.data()[0]))*0x1000000;
+    number += static_cast<int>(static_cast<unsigned char>(buffer.data()[1]))*0x0010000;
+    number += static_cast<int>(static_cast<unsigned char>(buffer.data()[2]))*0x0000100;
+    number += static_cast<int>(static_cast<unsigned char>(buffer.data()[3]));
     return number;
 }
 
 qint64 Reader::Read_int(const QByteArray &buffer, int offset) {
     if (buffer.size() < offset+4) return false;
-    int number = 0;
-    for (int i = 0; i < 4; ++i) {
-        number += static_cast<int>(static_cast<unsigned char>(buffer.data()[offset+i]));
-    }
+    int number = static_cast<int>(static_cast<unsigned char>(buffer.data()[offset]))*0x1000000;
+    number += static_cast<int>(static_cast<unsigned char>(buffer.data()[offset+1]))*0x0010000;
+    number += static_cast<int>(static_cast<unsigned char>(buffer.data()[offset+2]))*0x0000100;
+    number += static_cast<int>(static_cast<unsigned char>(buffer.data()[offset+3]));
     return number;
 }
 
@@ -290,7 +300,7 @@ bool Reader::Get_File_Offset_And_Size(const QString &filePathInArchive, qint64 &
 
     //Scan through the file index to get the offset of the file in question
     qint64 fileIndexOffset = this->Read_qint64(this->currentDirectoryOffset) + this->currentDirectoryOffset;
-    QByteArray nameBuffer = this->Read_Bytes(fileIndexOffset+8, this->Read_qint64(fileIndexOffset));
+    QByteArray nameBuffer = this->Read_Bytes(fileIndexOffset+8, this->Read_qint64(fileIndexOffset)-8);
     for (int i = 0; i < nameBuffer.size();) {
         int nameLength = this->Read_int(nameBuffer, i);
         i += 4;
