@@ -42,7 +42,7 @@ int Packer::Pack(const QString &sourceFolderLocation, const QString &destination
     //Write the scramble key to the end of the file if it was used
     if (!file.seek(file.size())) return 6; //unable to write scramble key
     assert(this->scrambler);
-    QByteArray buffer(1, ' ');
+    QByteArray buffer(1, 0x00);
     buffer.data()[0] = static_cast<char>(this->scrambler->Get_Scramble_Key());
     if (file.write(buffer) != buffer.size()) return 6; //unable to write scramble key
     return 0;
@@ -52,9 +52,9 @@ bool Packer::Write_Archive_Header(QFile &file, const QFileInfo &sourceFolderInfo
     //Sequential Archive
     //Root Index Offset
     //File Name
-    QString header = Common_Strings::FORMAT_NAME +
-            this->Get_Byte_Array_From_qint64(Common_Strings::FORMAT_NAME.length()+17+sourceFolderInfo.fileName().length()) +
-            sourceFolderInfo.fileName();
+    QByteArray header = Common_Strings::FORMAT_NAME.toUtf8() +
+            this->Get_Byte_Array_From_qint64(Common_Strings::FORMAT_NAME.length()+8+sourceFolderInfo.fileName().length()) +
+            sourceFolderInfo.fileName().toUtf8();
     return this->Write_Buffer_To_File(file, header, 0);
 }
 
@@ -64,7 +64,7 @@ bool Packer::Pack_Directory(QFile &file, const QString &sourceFolderLocation) {
 
     //Allocate space for the length of the directory names
     qint64 startingOffset = file.size();
-    if (!this->Write_Buffer_To_File(file, QByteArray(8, ' '))) return false;
+    if (!this->Write_Buffer_To_File(file, QByteArray(8, 0x00))) return false;
 
     //Create a table entry for each directory
     QFileInfoList directories = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
@@ -72,35 +72,35 @@ bool Packer::Pack_Directory(QFile &file, const QString &sourceFolderLocation) {
     foreach (QFileInfo sourceDirectory, directories) {
         if (sourceDirectory.dir().count() == 0) continue; //we won't pack empty folders
 
-        //Write the length of the directory name
+        //Write the length of the directory name and the directory name itself
         if (!this->Write_Buffer_To_File(file, this->Get_Byte_Array_From_int(sourceDirectory.fileName().size()))) return false;
+        if (!this->Write_Buffer_To_File(file, sourceDirectory.fileName().toUtf8())) return false;
 
         //Insert the directory into the hash to update it later
         directoryTable.insert(sourceDirectory.fileName(), file.size());
 
-        //Allocate 16 bytes for the start and end pointers
-        if (!this->Write_Buffer_To_File(file, QByteArray(16, ' '))) return false;
-        if (!this->Write_Buffer_To_File(file, sourceDirectory.fileName())) return false;
+        //Allocate 16 bytes for the start pointer and size value
+        if (!this->Write_Buffer_To_File(file, QByteArray(16, 0x00))) return false;
     }
     if (!this->Write_Buffer_To_File(file, this->Get_Byte_Array_From_qint64(file.size()-startingOffset), startingOffset)) return false;
 
     //Allocate space for the length of the file names
     startingOffset = file.size();
-    if (!this->Write_Buffer_To_File(file, QByteArray(8, ' '))) return false;
+    if (!this->Write_Buffer_To_File(file, QByteArray(8, 0x00))) return false;
 
     //Create a table entry for each file
     QFileInfoList files = dir.entryInfoList(QDir::Files);
     QHash<QString, qint64> fileTable;
     foreach (QFileInfo sourceFile, files) {
-        //Write the length of the filename
+        //Write the length of the filename and the filename itself
         if (!this->Write_Buffer_To_File(file, this->Get_Byte_Array_From_int(sourceFile.fileName().size()))) return false;
+        if (!this->Write_Buffer_To_File(file, sourceFile.fileName().toUtf8())) return false;
 
         //Insert the file into the hash to update it later
-        fileTable.insert(sourceFile.fileName(),file.size());
+        fileTable.insert(sourceFile.fileName(), file.size());
 
-        //Allocate 16 bytes for the start and end pointers
-        if (!this->Write_Buffer_To_File(file, QByteArray(16, ' '))) return false;
-        if (!this->Write_Buffer_To_File(file, sourceFile.fileName())) return false;
+        //Allocate 16 bytes for the start pointer and size value
+        if (!this->Write_Buffer_To_File(file, QByteArray(16, 0x00))) return false;
     }
     if (!this->Write_Buffer_To_File(file, this->Get_Byte_Array_From_qint64(file.size()-startingOffset), startingOffset)) return false;
 
@@ -172,22 +172,16 @@ QByteArray Packer::Get_Byte_Array_From_int(int number) {
     return byteArray;
 }
 
-bool Packer::Write_Buffer_To_File(QFile &file, QByteArray &buffer) {
-    return this->Write_Buffer_To_File(file, buffer, file.size());
+bool Packer::Write_Buffer_To_File(QFile &file, QByteArray buffer) {
+    if (!file.seek(file.size())) return false;
+    assert(this->scrambler);
+    this->scrambler->Scramble(buffer, file.size());
+    return (file.write(buffer) == buffer.size());
 }
 
-bool Packer::Write_Buffer_To_File(QFile &file, QByteArray &buffer, qint64 offset) {
+bool Packer::Write_Buffer_To_File(QFile &file, QByteArray buffer, qint64 offset) {
     if (!file.seek(offset)) return false;
     assert(this->scrambler);
     this->scrambler->Scramble(buffer, offset);
     return (file.write(buffer) == buffer.size());
-}
-
-bool Packer::Write_Buffer_To_File(QFile &file, const QString &buffer) {
-    return this->Write_Buffer_To_File(file, buffer, file.size());
-}
-
-bool Packer::Write_Buffer_To_File(QFile &file, const QString &buffer, qint64 offset) {
-    QByteArray byteArray(buffer.toUtf8().data());
-    return this->Write_Buffer_To_File(file, byteArray, offset);
 }

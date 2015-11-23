@@ -160,9 +160,8 @@ bool Reader::Is_Archive_Valid() {
     }
 
     //Read the header to determine if the archive is valid
-    QString header = this->Read_Bytes(0, Common_Strings::FORMAT_NAME.length());
-    if (header.length() == 0) return false; //unable to read the header
-    return (header == Common_Strings::FORMAT_NAME); //if the header matches up, then assume that the archive is valid
+    QByteArray header = this->Read_Bytes(0, Common_Strings::FORMAT_NAME.length());
+    return (header == Common_Strings::FORMAT_NAME.toUtf8()); //if the header matches up, then assume that the archive is valid
 }
 
 bool Reader::Change_Local_Directory(const QString &directory) {
@@ -253,7 +252,7 @@ qint64 Reader::Read_qint64(const QByteArray &buffer, int offset) {
     if (buffer.size() < offset+8) return false;
     int number = 0;
     for (int i = 0; i < 8; ++i) {
-        number += static_cast<int>(static_cast<unsigned char>(buffer.data()[i]));
+        number += static_cast<int>(static_cast<unsigned char>(buffer.data()[offset+i]));
     }
     return number;
 }
@@ -272,7 +271,7 @@ qint64 Reader::Read_int(const QByteArray &buffer, int offset) {
     if (buffer.size() < offset+4) return false;
     int number = 0;
     for (int i = 0; i < 4; ++i) {
-        number += static_cast<int>(static_cast<unsigned char>(buffer.data()[i]));
+        number += static_cast<int>(static_cast<unsigned char>(buffer.data()[offset+i]));
     }
     return number;
 }
@@ -291,10 +290,10 @@ bool Reader::Get_File_Offset_And_Size(const QString &filePathInArchive, qint64 &
 
     //Scan through the file index to get the offset of the file in question
     qint64 fileIndexOffset = this->Read_qint64(this->currentDirectoryOffset) + this->currentDirectoryOffset;
-    qint64 length = this->Read_qint64(fileIndexOffset);
     QByteArray nameBuffer = this->Read_Bytes(fileIndexOffset+8, this->Read_qint64(fileIndexOffset));
     for (int i = 0; i < nameBuffer.size();) {
         int nameLength = this->Read_int(nameBuffer, i);
+        i += 4;
         QString name = "";
         for (int j = 0; j < nameLength; ++j) {
             name += nameBuffer.at(i+j);
@@ -315,7 +314,7 @@ bool Reader::Get_File_Offset_And_Size(const QString &filePathInArchive, qint64 &
 QByteArray Reader::Read_Bytes(qint64 offset, qint64 size) {
     assert(this->file);
     assert(this->file->isOpen() && this->file->isReadable());
-    assert(this->file->size() <= offset+size);
+    assert(this->file->size() >= offset+size);
     if (!this->file->seek(offset)) return QByteArray();
 
     //Read the bytes from the archive

@@ -23,10 +23,8 @@ private:
     bool Pack_File_With_Buffers(QFile &file, QFile &sourceFile, qint64 fileSize);
     QByteArray Get_Byte_Array_From_qint64(qint64 number);
     QByteArray Get_Byte_Array_From_int(int number);
-    bool Write_Buffer_To_File(QFile &file, QByteArray &buffer);
-    bool Write_Buffer_To_File(QFile &file, QByteArray &buffer, qint64 offset);
-    bool Write_Buffer_To_File(QFile &file, const QString &buffer);
-    bool Write_Buffer_To_File(QFile &file, const QString &buffer, qint64 offset);
+    bool Write_Buffer_To_File(QFile &file, QByteArray buffer);
+    bool Write_Buffer_To_File(QFile &file, QByteArray buffer, qint64 offset);
 
     Scrambler *scrambler;
 };
