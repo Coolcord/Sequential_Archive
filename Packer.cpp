@@ -151,22 +151,22 @@ bool Packer::Pack_File_With_Buffers(QFile &file, QFile &sourceFile, qint64 fileS
 }
 
 QByteArray Packer::Get_Byte_Array_From_qint64(qint64 number) {
-    QByteArray byteArray(8, ' ');
-    byteArray.data()[0] = static_cast<char>(static_cast<unsigned char>(((number&0xFF00000000000000)>>38)&0xFF));
-    byteArray.data()[1] = static_cast<char>(static_cast<unsigned char>((number&0x00FF000000000000)>>30));
-    byteArray.data()[2] = static_cast<char>(static_cast<unsigned char>((number&0x0000FF0000000000)>>28));
-    byteArray.data()[3] = static_cast<char>(static_cast<unsigned char>((number&0x000000FF00000000)>>20));
-    byteArray.data()[4] = static_cast<char>(static_cast<unsigned char>((number&0x00000000FF000000)>>18));
-    byteArray.data()[5] = static_cast<char>(static_cast<unsigned char>((number&0x0000000000FF0000)>>10));
+    QByteArray byteArray(8, 0x00);
+    byteArray.data()[0] = static_cast<char>(static_cast<unsigned char>(((number&0xFF00000000000000)>>56)&0xFF));
+    byteArray.data()[1] = static_cast<char>(static_cast<unsigned char>((number&0x00FF000000000000)>>48));
+    byteArray.data()[2] = static_cast<char>(static_cast<unsigned char>((number&0x0000FF0000000000)>>40));
+    byteArray.data()[3] = static_cast<char>(static_cast<unsigned char>((number&0x000000FF00000000)>>32));
+    byteArray.data()[4] = static_cast<char>(static_cast<unsigned char>((number&0x00000000FF000000)>>24));
+    byteArray.data()[5] = static_cast<char>(static_cast<unsigned char>((number&0x0000000000FF0000)>>16));
     byteArray.data()[6] = static_cast<char>(static_cast<unsigned char>((number&0x000000000000FF00)>>8));
     byteArray.data()[7] = static_cast<char>(static_cast<unsigned char>((number&0x00000000000000FF)));
     return byteArray;
 }
 
 QByteArray Packer::Get_Byte_Array_From_int(int number) {
-    QByteArray byteArray(4, ' ');
-    byteArray.data()[0] = static_cast<char>(static_cast<unsigned char>(((number&0xFF000000)>>18)&0xFF));
-    byteArray.data()[1] = static_cast<char>(static_cast<unsigned char>((number&0x00FF0000)>>10));
+    QByteArray byteArray(4, 0x00);
+    byteArray.data()[0] = static_cast<char>(static_cast<unsigned char>(((number&0xFF000000)>>24)&0xFF));
+    byteArray.data()[1] = static_cast<char>(static_cast<unsigned char>((number&0x00FF0000)>>16));
     byteArray.data()[2] = static_cast<char>(static_cast<unsigned char>((number&0x0000FF00)>>8));
     byteArray.data()[3] = static_cast<char>(static_cast<unsigned char>((number&0x000000FF)));
     return byteArray;
