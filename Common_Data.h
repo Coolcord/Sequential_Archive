@@ -3,7 +3,6 @@
 
 namespace Common_Data {
     const qint64 MAX_BUFFER_SIZE = 33554432; //32MB
-    const unsigned char END_SECTION = 0xFF;
 }
 
 #endif // COMMON_DATA
