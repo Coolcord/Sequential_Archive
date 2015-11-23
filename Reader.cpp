@@ -134,18 +134,18 @@ bool Reader::Extract_File_With_Buffer(qint64 offset, qint64 size, const QString 
 bool Reader::Extract_Directory(const QString &directoryPathInArchive, const QString &destination) {
     //Create a folder to extract the files into
     QDir dir(destination);
-    if (!dir.exists() && !dir.mkdir(destination + "/" + (this->Get_File_Name_From_Path(directoryPathInArchive)))) return false;
+    if (!dir.exists() && !dir.mkdir(dir.path())) return false;
 
     //Extract all of the files first
     QStringList files = this->Get_Files(directoryPathInArchive);
     foreach (QString file, files) {
-        if (!this->Extract_File(directoryPathInArchive + "/" + file, destination + "/" + file)) return false;
+        if (!this->Extract_File(this->Get_New_Path(directoryPathInArchive, file), this->Get_New_Path(destination, file))) return false;
     }
 
     //Then extract all of the directories
     QStringList directories = this->Get_Directories(directoryPathInArchive);
     foreach (QString directory, directories) {
-        if (!this->Extract_Directory(directoryPathInArchive + "/" + directory, destination + "/" + directory)) return false;
+        if (!this->Extract_Directory(this->Get_New_Path(directoryPathInArchive, directory), this->Get_New_Path(destination, directory))) return false;
     }
 
     return true;
@@ -334,4 +334,11 @@ QByteArray Reader::Read_Bytes(qint64 offset, qint64 size) {
     //Unscramble the bytes if necessary
     if (this->scrambler) this->scrambler->Unscramble(buffer, offset);
     return buffer;
+}
+
+QString Reader::Get_New_Path(const QString &currentPath, const QString &nextDirectory) {
+    QString newPath = currentPath;
+    if (!currentPath.endsWith('/')) newPath += "/";
+    newPath += nextDirectory;
+    return newPath;
 }
