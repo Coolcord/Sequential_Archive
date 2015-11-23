@@ -7,8 +7,6 @@
 #include <QHash>
 #include <assert.h>
 
-#include <QDebug>
-
 Packer::Packer() {
     this->scrambler = new Scrambler(static_cast<unsigned char>(qrand()%0x100));
 }
