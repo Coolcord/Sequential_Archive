@@ -41,6 +41,16 @@ QString Reader::Get_Archive_Name() {
     return QString(this->Read_Bytes(nameOffset, rootTableOffset-nameOffset));
 }
 
+unsigned char Reader::Get_Archive_Scramble_Key() {
+    //Read the scramble key if it wasn't specified
+    if (!this->scrambler) {
+        unsigned char scrambleKey = 0x00;
+        if (!this->Read_Scramble_Key(scrambleKey)) return false;
+        this->scrambler = new Scrambler(scrambleKey);
+    }
+    return this->scrambler->Get_Scramble_Key();
+}
+
 bool Reader::Change_Directory(const QString &directory) {
     if (directory.contains('/')) {
         if (directory.startsWith('/') && !this->Change_To_Root_Directory()) return false;

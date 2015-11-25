@@ -25,6 +25,7 @@ public:
     virtual bool Open(const QString &archive, unsigned char scrambleKey)=0;
     virtual void Close()=0;
     virtual QString Get_Archive_Name()=0;
+    virtual unsigned char Get_Archive_Scramble_Key()=0;
     virtual bool Change_Directory(const QString &directory)=0;
     virtual QStringList Get_Directories()=0;
     virtual QStringList Get_Directories(const QString &pathInArchive)=0;

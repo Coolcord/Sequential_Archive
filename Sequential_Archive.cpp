@@ -100,6 +100,11 @@ QString Sequential_Archive::Get_Archive_Name() {
     return this->reader->Get_Archive_Name();
 }
 
+unsigned char Sequential_Archive::Get_Archive_Scramble_Key() {
+    if (!this->reader) return 0x00;
+    return this->reader->Get_Archive_Scramble_Key();
+}
+
 bool Sequential_Archive::Change_Directory(const QString &directory) {
     if (!this->reader) return false;
     return this->reader->Change_Directory(directory);

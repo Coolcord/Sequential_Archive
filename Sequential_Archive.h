@@ -33,6 +33,7 @@ public:
     bool Open(const QString &archive, unsigned char scrambleKey);
     void Close();
     QString Get_Archive_Name();
+    unsigned char Get_Archive_Scramble_Key();
     bool Change_Directory(const QString &directory);
     QStringList Get_Directories();
     QStringList Get_Directories(const QString &pathInArchive);
