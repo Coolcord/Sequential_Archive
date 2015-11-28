@@ -20,3 +20,77 @@ MainWindow::~MainWindow() {
     delete this->treeView;
     delete this->textBrowser;
 }
+
+void MainWindow::on_actionNew_triggered()
+{
+
+}
+
+void MainWindow::on_actionOpen_triggered()
+{
+
+}
+
+void MainWindow::on_actionSave_triggered()
+{
+
+}
+
+void MainWindow::on_actionSave_as_triggered()
+{
+
+}
+
+void MainWindow::on_actionClose_triggered()
+{
+
+}
+
+void MainWindow::on_actionExit_triggered() {
+    this->close();
+}
+
+void MainWindow::on_actionAbout_Sequential_Archive_Manager_triggered()
+{
+
+}
+
+void MainWindow::on_actionExtract_All_triggered()
+{
+
+}
+
+void MainWindow::on_actionExtract_Selected_triggered()
+{
+
+}
+
+void MainWindow::on_actionShow_In_Explorer_triggered()
+{
+
+}
+
+void MainWindow::on_actionShow_in_triggered()
+{
+
+}
+
+void MainWindow::on_actionPack_triggered()
+{
+
+}
+
+void MainWindow::on_actionUnpack_triggered()
+{
+
+}
+
+void MainWindow::on_actionAdd_Files_triggered()
+{
+
+}
+
+void MainWindow::on_actionRemove_Selected_triggered()
+{
+
+}
