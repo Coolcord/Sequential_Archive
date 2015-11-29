@@ -23,6 +23,7 @@ public:
     //Reader Functions
     virtual bool Open(const QString &archive)=0;
     virtual bool Open(const QString &archive, unsigned char scrambleKey)=0;
+    virtual bool Is_Open()=0;
     virtual void Close()=0;
     virtual QString Get_Archive_Name()=0;
     virtual unsigned char Get_Archive_Scramble_Key()=0;

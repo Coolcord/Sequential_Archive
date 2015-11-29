@@ -31,6 +31,7 @@ public:
     //Reader Functions
     bool Open(const QString &archive);
     bool Open(const QString &archive, unsigned char scrambleKey);
+    bool Is_Open();
     void Close();
     QString Get_Archive_Name();
     unsigned char Get_Archive_Scramble_Key();

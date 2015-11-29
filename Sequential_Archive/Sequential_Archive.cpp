@@ -89,6 +89,10 @@ bool Sequential_Archive::Open(const QString &archive, unsigned char scrambleKey)
     }
 }
 
+bool Sequential_Archive::Is_Open() {
+    return this->reader;
+}
+
 void Sequential_Archive::Close() {
     if (this->reader) this->reader->Close();
     delete this->reader;

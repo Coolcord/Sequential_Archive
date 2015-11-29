@@ -12,9 +12,13 @@ TARGET = Sequential_Archive_Manager
 TEMPLATE = app
 
 
-SOURCES += main.cpp\
-        mainwindow.cpp
+SOURCES += main.cpp \
+    Main_Window.cpp
 
-HEADERS  += mainwindow.h
+HEADERS  += \
+    ../Sequential_Archive/Common_Strings.h \
+    Manager_Common_Strings.h \
+    Main_Window.h \
+    Archive_Mode.h
 
 FORMS    += mainwindow.ui
