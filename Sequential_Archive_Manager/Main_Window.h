@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QApplication>
 #include <QString>
+#include <QTemporaryDir>
 #include <QSplitter>
 #include <QTreeView>
 #include <QTextBrowser>
@@ -48,7 +49,11 @@ private:
     QTextBrowser *textBrowser;
     Sequential_Archive_Interface *sequentialArchive;
     int archiveMode;
+    QString archiveLocation;
+    QTemporaryDir *tmpDir;
+    QString currentArchivePath;
 
+    void Change_Archive_Mode(int archiveMode);
 };
 
 #endif // MAINWINDOW_H
