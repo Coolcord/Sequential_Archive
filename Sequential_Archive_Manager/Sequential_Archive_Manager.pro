@@ -19,6 +19,7 @@ HEADERS  += \
     ../Sequential_Archive/Common_Strings.h \
     Manager_Common_Strings.h \
     Main_Window.h \
+    Archive_Mode.h \
     Archive_Mode.h
 
 FORMS    += mainwindow.ui

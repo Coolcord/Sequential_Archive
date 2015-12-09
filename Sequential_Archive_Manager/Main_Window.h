@@ -54,6 +54,13 @@ private:
     QString currentArchivePath;
 
     void Change_Archive_Mode(int archiveMode);
+    bool Create_New_Tmp_Dir();
+    bool Unpack();
+    bool Pack();
+    bool Save();
+    void Close_Archive();
+    bool Get_New_Save_Location();
+    bool Handle_Unsaved_Changes();
 };
 
 #endif // MAINWINDOW_H
