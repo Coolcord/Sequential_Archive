@@ -122,7 +122,17 @@ void MainWindow::on_actionUnpack_triggered() {
 
 void MainWindow::on_actionAdd_Files_triggered() {
     assert(this->archiveMode != CLOSED);
-    //TODO: Write this...
+    bool repack = this->archiveMode == PACKED;
+
+    QStringList files = QFileDialog::getOpenFileNames(this, "Add files", QApplication::applicationDirPath(),
+                                                        "All files (*.*)");
+    if (files.isEmpty()) return; //the user did not provide any files to add
+
+    if (repack) this->Unpack(); //unpack if necessary
+    foreach (QString file, files) {
+        //TODO: Write this...
+    }
+    if (repack) this->Pack(); //repack if necessary
 }
 
 void MainWindow::on_actionRemove_Selected_triggered() {
