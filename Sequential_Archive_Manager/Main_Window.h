@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QApplication>
+#include <QDirModel>
 #include <QString>
 #include <QTemporaryDir>
 #include <QSplitter>
@@ -42,6 +43,8 @@ private slots:
     void on_actionAdd_Files_triggered();
     void on_actionRemove_Selected_triggered();
 
+    void on_actionRefresh_triggered();
+
 private:
     Ui::MainWindow *ui;
     QSplitter *splitter;
@@ -52,6 +55,7 @@ private:
     QString archiveLocation;
     QTemporaryDir *tmpDir;
     QString currentArchivePath;
+    QDirModel *unpackedModel;
 
     void Change_Archive_Mode(int archiveMode);
     bool Create_New_Tmp_Dir();

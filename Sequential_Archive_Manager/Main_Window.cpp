@@ -15,6 +15,7 @@ MainWindow::MainWindow(Sequential_Archive_Interface *sequentialArchive, QWidget 
     this->archiveLocation = QString();
     this->currentArchivePath = "/";
     this->tmpDir = NULL;
+    this->unpackedModel = NULL;
 
     this->splitter = new QSplitter(this);
     this->ui->horizontalLayout->addWidget(this->splitter);
@@ -22,17 +23,17 @@ MainWindow::MainWindow(Sequential_Archive_Interface *sequentialArchive, QWidget 
     this->splitter->addWidget(this->treeView);
     this->textBrowser = new QTextBrowser(this->splitter);
     this->splitter->addWidget(this->textBrowser);
-
     this->Change_Archive_Mode(CLOSED);
 }
 
 MainWindow::~MainWindow() {
-    delete this->ui;
-    delete this->splitter;
     delete this->treeView;
     delete this->textBrowser;
+    delete this->splitter;
+    delete this->ui;
     this->sequentialArchive->Shutdown();
     delete this->sequentialArchive;
+    delete this->unpackedModel;
     if (this->tmpDir) this->tmpDir->remove();
     delete this->tmpDir;
 }
@@ -42,6 +43,7 @@ void MainWindow::on_actionNew_triggered() {
 
     if (this->tmpDir) this->tmpDir->remove();
     delete this->tmpDir;
+    this->tmpDir = NULL;
     this->archiveLocation = QString();
     this->currentArchivePath = "/";
     this->Create_New_Tmp_Dir();
@@ -81,9 +83,8 @@ void MainWindow::on_actionExit_triggered() {
     this->close();
 }
 
-void MainWindow::on_actionAbout_Sequential_Archive_Manager_triggered()
-{
-
+void MainWindow::on_actionAbout_Sequential_Archive_Manager_triggered() {
+    //TODO: Write this...
 }
 
 void MainWindow::on_actionExtract_All_triggered() {
@@ -101,15 +102,19 @@ void MainWindow::on_actionExtract_All_triggered() {
 }
 
 void MainWindow::on_actionExtract_Selected_triggered() {
+    //TODO: Write this...
+}
 
+void MainWindow::on_actionRefresh_triggered() {
+    //TODO: Write this...
 }
 
 void MainWindow::on_actionShow_In_Explorer_triggered() {
-
+    //TODO: Write this...
 }
 
 void MainWindow::on_actionShow_in_triggered() {
-
+    //TODO: Write this...
 }
 
 void MainWindow::on_actionPack_triggered() {
@@ -128,11 +133,23 @@ void MainWindow::on_actionAdd_Files_triggered() {
                                                         "All files (*.*)");
     if (files.isEmpty()) return; //the user did not provide any files to add
 
+    //Create the directory structure in the temporary directory if necessary
+    //TODO: Write this...
+
+    //Copy each file to the temporary directory
     if (repack) this->Unpack(); //unpack if necessary
     foreach (QString file, files) {
-        //TODO: Write this...
+        //TODO: Handle directory structure
+        if (!QFile::copy(file, this->tmpDir->path() + "/" + QFileInfo(file).fileName())) {
+            QMessageBox::critical(this, Common_Strings::MANAGER_NAME, "Unable to copy " + QFileInfo(file).fileName() + "!",
+                                      Common_Strings::OK);
+            break;
+        }
     }
     if (repack) this->Pack(); //repack if necessary
+
+    //TODO: Update Tree View
+    //this->treeView->
 }
 
 void MainWindow::on_actionRemove_Selected_triggered() {
@@ -197,6 +214,7 @@ bool MainWindow::Create_New_Tmp_Dir() {
     this->tmpDir = new QTemporaryDir();
     if (!this->tmpDir->isValid()) {
         delete this->tmpDir;
+        this->tmpDir = NULL;
         QMessageBox::critical(this, Common_Strings::MANAGER_NAME, "Unable to create a temporary directory to work in!",
                                   Common_Strings::OK);
         return false;
@@ -208,6 +226,7 @@ bool MainWindow::Unpack() {
     assert(this->archiveMode == PACKED);
 
     //Create a new temporary directory
+    if (this->tmpDir) this->tmpDir->remove();
     delete this->tmpDir;
     this->tmpDir = new QTemporaryDir();
 
@@ -230,14 +249,21 @@ bool MainWindow::Unpack() {
 bool MainWindow::Pack() {
     assert(this->archiveMode == UNPACKED);
     assert(this->tmpDir);
+    assert(this->unpackedModel);
 
     //Ask the user where to save the archive if it wasn't already specified
     if (this->archiveLocation.isEmpty() && !this->Get_New_Save_Location()) return true;
 
     //TODO: Add a progress bar...
     if (this->sequentialArchive->Pack(this->tmpDir->path(), this->archiveLocation)) {
+        //TODO: This chunk of code should be abstracted to a private function
+        //==================================
         this->tmpDir->remove();
         delete this->tmpDir;
+        this->tmpDir = NULL;
+        delete this->unpackedModel;
+        this->unpackedModel = NULL;
+        //==================================
         this->Change_Archive_Mode(PACKED);
         QMessageBox::information(this, Common_Strings::MANAGER_NAME, "Successfully packed " + QFileInfo(archiveLocation).fileName() + "!",
                                  Common_Strings::OK);
@@ -263,7 +289,7 @@ void MainWindow::Close_Archive() {
 
 bool MainWindow::Get_New_Save_Location() {
     QString archiveLocation = QFileDialog::getSaveFileName(this, "Save Location", QApplication::applicationDirPath(),
-                                                            Common_Strings::FORMAT_NAME + "s {*." + Common_Strings::EXTENSION + ");;All files (*.*)");
+                                                            Common_Strings::FORMAT_NAME + "s {*." + Common_Strings::EXTENSION + ";;All files (*.*)");
     if (archiveLocation.isEmpty()) return false; //the user aborted the save
     this->archiveLocation = archiveLocation;
     return true;
