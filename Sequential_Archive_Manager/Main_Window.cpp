@@ -39,11 +39,10 @@ MainWindow::~MainWindow() {
 }
 
 void MainWindow::on_actionNew_triggered() {
+    //TODO: Handle errors
     if (!this->Handle_Unsaved_Changes()) return;
+    if (!this->Create_New_Tmp_Dir()) return;
 
-    if (this->tmpDir) this->tmpDir->remove();
-    delete this->tmpDir;
-    this->tmpDir = NULL;
     this->archiveLocation = QString();
     this->currentArchivePath = "/";
     this->Create_New_Tmp_Dir();
@@ -211,24 +210,35 @@ void MainWindow::Change_Archive_Mode(int archiveMode) {
 }
 
 bool MainWindow::Create_New_Tmp_Dir() {
+    if (!this->Remove_Tmp_Dir()) return false;
+    assert(!this->tmpDir);
+    assert(!this->unpackedModel);
     this->tmpDir = new QTemporaryDir();
     if (!this->tmpDir->isValid()) {
-        delete this->tmpDir;
-        this->tmpDir = NULL;
+        this->Remove_Tmp_Dir(); //ignore output... a failure already happened anyway
         QMessageBox::critical(this, Common_Strings::MANAGER_NAME, "Unable to create a temporary directory to work in!",
                                   Common_Strings::OK);
         return false;
     }
+    this->unpackedModel = new QDirModel(this);
     return true;
+}
+
+bool MainWindow::Remove_Tmp_Dir() {
+    if (this->tmpDir) {
+        bool success = this->tmpDir->remove();
+        delete this->tmpDir;
+        this->tmpDir = NULL;
+        delete this->unpackedModel;
+        this->unpackedModel = NULL;
+        return success;
+    }
+    return true; //return true if there is nothing to remove
 }
 
 bool MainWindow::Unpack() {
     assert(this->archiveMode == PACKED);
-
-    //Create a new temporary directory
-    if (this->tmpDir) this->tmpDir->remove();
-    delete this->tmpDir;
-    this->tmpDir = new QTemporaryDir();
+    if (!this->Create_New_Tmp_Dir()) return false;
 
     //TODO: Add a progress bar...
     if (this->sequentialArchive->Extract_Directory("/", this->tmpDir->path())) {
@@ -256,14 +266,11 @@ bool MainWindow::Pack() {
 
     //TODO: Add a progress bar...
     if (this->sequentialArchive->Pack(this->tmpDir->path(), this->archiveLocation)) {
-        //TODO: This chunk of code should be abstracted to a private function
-        //==================================
-        this->tmpDir->remove();
-        delete this->tmpDir;
-        this->tmpDir = NULL;
-        delete this->unpackedModel;
-        this->unpackedModel = NULL;
-        //==================================
+        if (!this->Remove_Tmp_Dir()) {
+            QMessageBox::critical(this, Common_Strings::MANAGER_NAME, "Unable to remove temporary directory!",
+                                  Common_Strings::OK);
+            return false;
+        }
         this->Change_Archive_Mode(PACKED);
         QMessageBox::information(this, Common_Strings::MANAGER_NAME, "Successfully packed " + QFileInfo(archiveLocation).fileName() + "!",
                                  Common_Strings::OK);

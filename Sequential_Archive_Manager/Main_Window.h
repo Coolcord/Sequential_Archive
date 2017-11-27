@@ -59,6 +59,7 @@ private:
 
     void Change_Archive_Mode(int archiveMode);
     bool Create_New_Tmp_Dir();
+    bool Remove_Tmp_Dir();
     bool Unpack();
     bool Pack();
     bool Save();
