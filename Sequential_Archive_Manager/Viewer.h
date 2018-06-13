@@ -19,7 +19,10 @@ public:
     Viewer(QWidget *parent, Sequential_Archive_Interface *sequentialArchivePlugin, const QString &openedFileName);
     ~Viewer();
     bool Populate_Window();
-    bool Populate_Folder(QTreeWidgetItem *parent);
+    bool Populate_Folder(QTreeWidgetItem *parent, const QString &path);
+
+private slots:
+    void on_treeWidget_itemSelectionChanged();
 
 private:
     Ui::Viewer *ui;
