@@ -28,6 +28,7 @@ private:
     Error_Messages *errorMessages;
     Sequential_Archive_Interface *sequentialArchivePlugin;
     QString applicationLocation;
+    QString openLocation;
 };
 
 #endif // MAIN_WINDOW_H

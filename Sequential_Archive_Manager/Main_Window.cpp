@@ -3,6 +3,7 @@
 #include "../Sequential_Archive/Sequential_Archive_Interface.h"
 #include "Common_Strings.h"
 #include "Error_Messages.h"
+#include "Version.h"
 #include "Viewer.h"
 #include <assert.h>
 #include <QFileDialog>
@@ -16,8 +17,10 @@ Main_Window::Main_Window(QWidget *parent, Sequential_Archive_Interface *sequenti
     this->sequentialArchivePlugin = sequentialArchivePlugin;
     this->errorMessages = errorMessages;
     this->applicationLocation = QApplication::applicationDirPath();
+    this->openLocation = this->applicationLocation;
     this->sequentialArchivePlugin->Startup(this, this->applicationLocation);
     ui->setupUi(this);
+    this->setWindowTitle(Common_Strings::STRING_SAM+" "+Version::VERSION);
 }
 
 Main_Window::~Main_Window() {
@@ -25,13 +28,14 @@ Main_Window::~Main_Window() {
 }
 
 void Main_Window::on_btnPack_clicked() {
-    QString folderLocation = QFileDialog::getExistingDirectory(this, "Select a folder to pack", this->applicationLocation);
+    QString folderLocation = QFileDialog::getExistingDirectory(this, "Select a folder to pack", this->openLocation);
     if (folderLocation.isEmpty()) return;
     QFileInfo folderInfo(folderLocation);
+    this->openLocation = folderInfo.path();
     QString outputArchiveLocation = folderInfo.path()+"/"+folderInfo.fileName()+Common_Strings::STRING_EXTENSION;
     if (QFileInfo(outputArchiveLocation).exists()) {
         outputArchiveLocation = QFileDialog::getSaveFileName(this, "Choose where to save the "+Common_Strings::STRING_SEQUENTIAL_ARCHIVE,
-                                                               folderInfo.path(), Common_Strings::STRING_EXTENSION_FILTERS);
+                                                               this->openLocation, Common_Strings::STRING_EXTENSION_FILTERS);
     }
     if (outputArchiveLocation.isEmpty()) return;
     int result = this->sequentialArchivePlugin->Pack(folderLocation, outputArchiveLocation);
@@ -46,12 +50,13 @@ void Main_Window::on_btnPack_clicked() {
 
 void Main_Window::on_btnUnpack_clicked() {
     QString archiveLocation = QFileDialog::getOpenFileName(this, "Open a "+Common_Strings::STRING_SEQUENTIAL_ARCHIVE,
-                                                           this->applicationLocation, Common_Strings::STRING_EXTENSION_FILTERS);
+                                                           this->openLocation, Common_Strings::STRING_EXTENSION_FILTERS);
     if (archiveLocation.isEmpty()) return;
     QFileInfo archiveInfo(archiveLocation);
+    this->openLocation = archiveInfo.path();
     QString outputFolderLocation = archiveInfo.path()+"/"+archiveInfo.completeBaseName();
     if (QDir(outputFolderLocation).exists()) {
-        outputFolderLocation = QFileDialog::getExistingDirectory(this, "Choose where to extract "+archiveInfo.fileName(), archiveInfo.path());
+        outputFolderLocation = QFileDialog::getExistingDirectory(this, "Choose where to extract "+archiveInfo.fileName(), this->openLocation);
     }
     if (outputFolderLocation.isEmpty()) return;
     int result = this->sequentialArchivePlugin->Unpack(archiveLocation, outputFolderLocation);
@@ -65,9 +70,10 @@ void Main_Window::on_btnUnpack_clicked() {
 
 void Main_Window::on_btnView_clicked() {
     QString archiveLocation = QFileDialog::getOpenFileName(this, Common_Strings::STRING_SEQUENTIAL_ARCHIVE_MANAGER,
-                                                        this->applicationLocation, Common_Strings::STRING_EXTENSION_FILTERS);
+                                                        this->openLocation, Common_Strings::STRING_EXTENSION_FILTERS);
     if (archiveLocation.isEmpty()) return;
     QFileInfo archiveInfo(archiveLocation);
+    this->openLocation = archiveInfo.path();
     Viewer viewer(this, this->sequentialArchivePlugin, archiveInfo.fileName());
     if (!this->sequentialArchivePlugin->Open(archiveLocation) || !viewer.Populate_Window()) {
         this->errorMessages->Show_Unable_To_Open_Error(archiveInfo.fileName());

@@ -33,7 +33,8 @@ HEADERS += \
         Main_Window.h \
     Viewer.h \
     Common_Strings.h \
-    Error_Messages.h
+    Error_Messages.h \
+    Version.h
 
 FORMS += \
         Main_Window.ui \

@@ -14,6 +14,7 @@ namespace Common_Strings {
 
     const static QString STRING_SEQUENTIAL_ARCHIVE = "Sequential Archive";
     const static QString STRING_SEQUENTIAL_ARCHIVE_MANAGER = STRING_SEQUENTIAL_ARCHIVE+" Manager";
+    const static QString STRING_SAM = "SAM";
     const static QString STRING_EXTENSION = ".sa";
     const static QString STRING_PLUGIN_LOCATION = "./Plugins/Sequential_Archive"+STRING_PLUGIN_EXTENSION;
     const static QString STRING_OK = "OK";
