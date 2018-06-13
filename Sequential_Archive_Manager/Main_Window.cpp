@@ -27,7 +27,7 @@ void Main_Window::on_btnPack_clicked() {
     QString folderLocation = QFileDialog::getExistingDirectory(this, "Select a folder to pack", this->applicationLocation);
     if (folderLocation.isEmpty()) return;
     QFileInfo folderInfo(folderLocation);
-    QString outputArchiveLocation = folderInfo.path()+folderInfo.fileName()+Common_Strings::STRING_EXTENSION;
+    QString outputArchiveLocation = folderInfo.path()+"/"+folderInfo.fileName()+Common_Strings::STRING_EXTENSION;
     if (QFileInfo(outputArchiveLocation).exists()) {
         outputArchiveLocation = QFileDialog::getSaveFileName(this, "Choose where to save the "+Common_Strings::STRING_SEQUENTIAL_ARCHIVE,
                                                                folderInfo.path(), Common_Strings::STRING_EXTENSION_FILTERS);

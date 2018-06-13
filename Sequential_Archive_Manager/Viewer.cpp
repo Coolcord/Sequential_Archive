@@ -1,6 +1,7 @@
 #include "Viewer.h"
 #include "ui_Viewer.h"
 #include "../Sequential_Archive/Sequential_Archive_Interface.h"
+#include <assert.h>
 
 Viewer::Viewer(QWidget *parent, Sequential_Archive_Interface *sequentialArchivePlugin) :
     QDialog(parent, Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint),
