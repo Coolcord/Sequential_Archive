@@ -1,6 +1,6 @@
 #-------------------------------------------------
 #
-# Project created by QtCreator 2015-11-25T10:55:25
+# Project created by QtCreator 2018-06-12T16:19:42
 #
 #-------------------------------------------------
 
@@ -11,15 +11,27 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = Sequential_Archive_Manager
 TEMPLATE = app
 
+# The following define makes your compiler emit warnings if you use
+# any feature of Qt which has been marked as deprecated (the exact warnings
+# depend on your compiler). Please consult the documentation of the
+# deprecated API in order to know how to port your code away from it.
+DEFINES += QT_DEPRECATED_WARNINGS
 
-SOURCES += main.cpp \
-    Main_Window.cpp
+# You can also make your code fail to compile if you use deprecated APIs.
+# In order to do so, uncomment the following line.
+# You can also select to disable deprecated APIs only up to a certain version of Qt.
+#DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-HEADERS  += \
-    ../Sequential_Archive/Common_Strings.h \
-    Manager_Common_Strings.h \
-    Main_Window.h \
-    Archive_Mode.h \
-    Archive_Mode.h
 
-FORMS    += mainwindow.ui
+SOURCES += \
+        main.cpp \
+        Main_Window.cpp \
+    Viewer.cpp
+
+HEADERS += \
+        Main_Window.h \
+    Viewer.h
+
+FORMS += \
+        Main_Window.ui \
+    Viewer.ui

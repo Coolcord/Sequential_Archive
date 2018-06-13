@@ -1,71 +1,27 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#ifndef MAIN_WINDOW_H
+#define MAIN_WINDOW_H
 
-#include <QMainWindow>
-#include <QApplication>
-#include <QDirModel>
-#include <QString>
-#include <QTemporaryDir>
-#include <QSplitter>
-#include <QTreeView>
-#include <QTextBrowser>
-
-#include "Archive_Mode.h"
-
-class Sequential_Archive_Interface;
+#include <QDialog>
 
 namespace Ui {
-class MainWindow;
+class Main_Window;
 }
 
-class MainWindow : public QMainWindow
+class Main_Window : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit MainWindow(Sequential_Archive_Interface *sequentialArchive, QWidget *parent = 0);
-    ~MainWindow();
+    Main_Window(QWidget *parent);
+    ~Main_Window();
 
 private slots:
-    void on_actionNew_triggered();
-    void on_actionOpen_triggered();
-    void on_actionSave_triggered();
-    void on_actionSave_as_triggered();
-    void on_actionClose_triggered();
-    void on_actionExit_triggered();
-    void on_actionAbout_Sequential_Archive_Manager_triggered();
-    void on_actionExtract_All_triggered();
-    void on_actionExtract_Selected_triggered();
-    void on_actionShow_In_Explorer_triggered();
-    void on_actionShow_in_triggered();
-    void on_actionPack_triggered();
-    void on_actionUnpack_triggered();
-    void on_actionAdd_Files_triggered();
-    void on_actionRemove_Selected_triggered();
-
-    void on_actionRefresh_triggered();
+    void on_btnPack_clicked();
+    void on_btnUnpack_clicked();
+    void on_btnView_clicked();
 
 private:
-    Ui::MainWindow *ui;
-    QSplitter *splitter;
-    QTreeView *treeView;
-    QTextBrowser *textBrowser;
-    Sequential_Archive_Interface *sequentialArchive;
-    int archiveMode;
-    QString archiveLocation;
-    QTemporaryDir *tmpDir;
-    QString currentArchivePath;
-    QDirModel *unpackedModel;
-
-    void Change_Archive_Mode(int archiveMode);
-    bool Create_New_Tmp_Dir();
-    bool Remove_Tmp_Dir();
-    bool Unpack();
-    bool Pack();
-    bool Save();
-    void Close_Archive();
-    bool Get_New_Save_Location();
-    bool Handle_Unsaved_Changes();
+    Ui::Main_Window *ui;
 };
 
-#endif // MAINWINDOW_H
+#endif // MAIN_WINDOW_H
