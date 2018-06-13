@@ -26,9 +26,6 @@ private slots:
 
 private:
     Ui::Viewer *ui;
-    QSplitter *splitter;
-    QTextBrowser *textBrowser;
-    QTreeWidget *treeWidget;
     Sequential_Archive_Interface *sequentialArchivePlugin;
 };
 

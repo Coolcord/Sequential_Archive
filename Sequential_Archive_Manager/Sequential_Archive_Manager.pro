@@ -38,3 +38,7 @@ HEADERS += \
 FORMS += \
         Main_Window.ui \
     Viewer.ui
+
+RC_FILE = Sequential_Archive.rc
+
+OTHER_FILES +=
