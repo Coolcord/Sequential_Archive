@@ -1,6 +1,6 @@
 #include "Packer.h"
+#include "../Sequential_Archive_Manager/Common_Strings.h"
 #include "Scrambler.h"
-#include "Common_Strings.h"
 #include "Common_Data.h"
 #include <QDir>
 #include <QTextStream>
@@ -50,8 +50,8 @@ bool Packer::Write_Archive_Header(QFile &file, const QFileInfo &sourceFolderInfo
     //Sequential Archive
     //Root Index Offset
     //File Name
-    QByteArray header = Common_Strings::FORMAT_NAME.toUtf8() +
-            this->Get_Byte_Array_From_qint64(Common_Strings::FORMAT_NAME.length()+8+sourceFolderInfo.fileName().length()) +
+    QByteArray header = Common_Strings::STRING_SEQUENTIAL_ARCHIVE.toUtf8() +
+            this->Get_Byte_Array_From_qint64(Common_Strings::STRING_SEQUENTIAL_ARCHIVE.length()+8+sourceFolderInfo.fileName().length()) +
             sourceFolderInfo.fileName().toUtf8();
     return this->Write_Buffer_To_File(file, header, 0);
 }

@@ -1,6 +1,6 @@
 #include "Reader.h"
+#include "../Sequential_Archive_Manager/Common_Strings.h"
 #include "Scrambler.h"
-#include "Common_Strings.h"
 #include "Common_Data.h"
 #include <QDir>
 #include <assert.h>
@@ -33,9 +33,9 @@ void Reader::Close() {
 
 QString Reader::Get_Archive_Name() {
     //Read the starting offset of the root table
-    qint64 rootTableOffset = this->Read_qint64(Common_Strings::FORMAT_NAME.length());
+    qint64 rootTableOffset = this->Read_qint64(Common_Strings::STRING_SEQUENTIAL_ARCHIVE.length());
     if (rootTableOffset == -1) return QString();
-    qint64 nameOffset = Common_Strings::FORMAT_NAME.length()+16;
+    qint64 nameOffset = Common_Strings::STRING_SEQUENTIAL_ARCHIVE.length()+16;
 
     //Now, using the starting offset, read the name
     return QString(this->Read_Bytes(nameOffset, rootTableOffset-nameOffset));
@@ -171,8 +171,8 @@ bool Reader::Is_Archive_Valid() {
     }
 
     //Read the header to determine if the archive is valid
-    QByteArray header = this->Read_Bytes(0, Common_Strings::FORMAT_NAME.length());
-    return (header == Common_Strings::FORMAT_NAME.toUtf8()); //if the header matches up, then assume that the archive is valid
+    QByteArray header = this->Read_Bytes(0, Common_Strings::STRING_SEQUENTIAL_ARCHIVE.length());
+    return (header == Common_Strings::STRING_SEQUENTIAL_ARCHIVE.toUtf8()); //if the header matches up, then assume that the archive is valid
 }
 
 bool Reader::Change_Local_Directory(const QString &directory) {
@@ -209,7 +209,7 @@ bool Reader::Change_To_Directory_Containing_File(const QString &filePathInArchiv
 }
 
 bool Reader::Change_To_Root_Directory() {
-    qint64 rootOffset = this->Read_qint64(Common_Strings::FORMAT_NAME.length());
+    qint64 rootOffset = this->Read_qint64(Common_Strings::STRING_SEQUENTIAL_ARCHIVE.length());
     if (rootOffset == -1) {
         return false;
     } else {

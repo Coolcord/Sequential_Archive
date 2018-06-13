@@ -1,7 +1,7 @@
 #include "Sequential_Archive.h"
+#include "../Sequential_Archive_Manager/Common_Strings.h"
 #include "Packer.h"
 #include "Reader.h"
-#include "Common_Strings.h"
 #include <QFileInfo>
 #include <QTime>
 
@@ -150,7 +150,7 @@ bool Sequential_Archive::Extract_Directory(const QString &directoryPathInArchive
 }
 
 QString Sequential_Archive::Get_Archive_Name_From_Source_Folder(const QString &sourceFolder) {
-    return sourceFolder + "." + Common_Strings::EXTENSION;
+    return sourceFolder + Common_Strings::STRING_EXTENSION;
 }
 
 QString Sequential_Archive::Get_Folder_From_Archive_Path(const QString &archivePath) {

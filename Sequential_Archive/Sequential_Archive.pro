@@ -23,7 +23,6 @@ HEADERS += \
     Sequential_Archive_Interface.h \
     Packer.h \
     Scrambler.h \
-    Common_Strings.h \
     Common_Data.h \
     Reader.h
 

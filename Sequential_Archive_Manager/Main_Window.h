@@ -2,17 +2,20 @@
 #define MAIN_WINDOW_H
 
 #include <QDialog>
+#include <QString>
+
+class Error_Messages;
+class Sequential_Archive_Interface;
 
 namespace Ui {
 class Main_Window;
 }
 
-class Main_Window : public QDialog
-{
+class Main_Window : public QDialog {
     Q_OBJECT
 
 public:
-    Main_Window(QWidget *parent);
+    Main_Window(QWidget *parent, Sequential_Archive_Interface *sequentialArchivePlugin, Error_Messages *errorMessages);
     ~Main_Window();
 
 private slots:
@@ -22,6 +25,9 @@ private slots:
 
 private:
     Ui::Main_Window *ui;
+    Error_Messages *errorMessages;
+    Sequential_Archive_Interface *sequentialArchivePlugin;
+    QString applicationLocation;
 };
 
 #endif // MAIN_WINDOW_H
