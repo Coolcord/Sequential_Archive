@@ -31,6 +31,7 @@ private:
     bool Extract_File_With_Buffer(qint64 offset, qint64 size, const QString &destination);
     bool Is_Archive_Valid();
     bool Change_Local_Directory(const QString &directory);
+    bool Change_To_Parent_Directory();
     bool Change_To_Directory_Containing_File(const QString &filePathInArchive);
     bool Change_To_Root_Directory();
     bool Read_Scramble_Key(unsigned char &scrambleKey);

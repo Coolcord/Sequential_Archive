@@ -24,6 +24,10 @@ void Error_Messages::Show_Read_Error(const QString &fileName) {
     return this->Show_Read_Write_Error(fileName, "read");
 }
 
+void Error_Messages::Show_Unable_To_Open_Error(const QString &fileName) {
+    return this->Show_Error("Unable to open "+fileName+"! Make sure that it is a valid "+Common_Strings::STRING_SEQUENTIAL_ARCHIVE+"!");
+}
+
 void Error_Messages::Show_Write_Error(const QString &fileName) {
     return this->Show_Read_Write_Error(fileName, "write");
 }

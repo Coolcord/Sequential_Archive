@@ -4,9 +4,11 @@
 #include "Error_Messages.h"
 #include <QApplication>
 #include <QPluginLoader>
+#include <QTime>
 
 int main(int argc, char *argv[]) {
     QApplication a(argc, argv);
+    qsrand(QTime::currentTime().msecsSinceStartOfDay());
 
     //Load the Hexagon Plugin
     QString unableToLoadPluginMessage = Common_Strings::STRING_SEQUENTIAL_ARCHIVE_MANAGER+" is unable to load the backend plugin! Make sure the plugin is in the plugins folder!";

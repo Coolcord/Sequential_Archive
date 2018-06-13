@@ -12,6 +12,7 @@ public:
     void Show_Information(const QString &message);
     void Show_Error(const QString &message);
     void Show_Read_Error(const QString &fileName);
+    void Show_Unable_To_Open_Error(const QString &fileName);
     void Show_Write_Error(const QString &fileName);
     void Show_Read_Write_Error(const QString &fileName);
     void Update_Parent(QWidget *parent);

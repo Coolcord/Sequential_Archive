@@ -28,7 +28,7 @@ void Scrambler::ScrambleByte(QByteArray &buffer, int index, qint64 offsetInFile)
 void Scrambler::UnscrambleByte(QByteArray &buffer, int index, qint64 offsetInFile) {
     unsigned char decrementAmount = this->GetScrambleAmount(index, offsetInFile);
     unsigned char byte = static_cast<unsigned char>(buffer.data()[index]);
-    byte -= decrementAmount; //the size of the unsigned char will handle wrapping for us
+    byte -= decrementAmount; //the size of the unsigned char will handle wrapping
     buffer.data()[index] = static_cast<char>(byte);
 }
 

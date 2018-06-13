@@ -58,6 +58,8 @@ bool Reader::Change_Directory(const QString &directory) {
             if (!this->Change_Local_Directory(dir)) return false;
         }
         return true;
+    } else if (directory == "..") {
+        return this->Change_To_Parent_Directory();
     } else {
         return this->Change_Local_Directory(directory);
     }
@@ -200,6 +202,11 @@ bool Reader::Change_Local_Directory(const QString &directory) {
         i += 8;
     }
     return false;
+}
+
+bool Reader::Change_To_Parent_Directory() {
+    if (this->currentPath == "/") return true; //nothing to do
+    return this->Change_Directory(QFileInfo(this->currentPath).path());
 }
 
 bool Reader::Change_To_Directory_Containing_File(const QString &filePathInArchive) {

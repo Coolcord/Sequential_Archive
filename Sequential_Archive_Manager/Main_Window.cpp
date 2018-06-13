@@ -16,6 +16,7 @@ Main_Window::Main_Window(QWidget *parent, Sequential_Archive_Interface *sequenti
     this->sequentialArchivePlugin = sequentialArchivePlugin;
     this->errorMessages = errorMessages;
     this->applicationLocation = QApplication::applicationDirPath();
+    this->sequentialArchivePlugin->Startup(this, this->applicationLocation);
     ui->setupUi(this);
 }
 
@@ -66,12 +67,12 @@ void Main_Window::on_btnView_clicked() {
     QString archiveLocation = QFileDialog::getOpenFileName(this, Common_Strings::STRING_SEQUENTIAL_ARCHIVE_MANAGER,
                                                         this->applicationLocation, Common_Strings::STRING_EXTENSION_FILTERS);
     if (archiveLocation.isEmpty()) return;
-    if (!this->sequentialArchivePlugin->Open(archiveLocation)) {
-        QFileInfo archiveInfo(archiveLocation);
-        this->errorMessages->Show_Error("Unable to open "+archiveInfo.fileName()+"! Make sure that it is a valid "+Common_Strings::STRING_SEQUENTIAL_ARCHIVE+"!");
+    QFileInfo archiveInfo(archiveLocation);
+    Viewer viewer(this, this->sequentialArchivePlugin, archiveInfo.fileName());
+    if (!this->sequentialArchivePlugin->Open(archiveLocation) || !viewer.Populate_Window()) {
+        this->errorMessages->Show_Unable_To_Open_Error(archiveInfo.fileName());
         return;
     }
-    Viewer viewer(this, this->sequentialArchivePlugin);
     viewer.exec();
     this->sequentialArchivePlugin->Close();
 }

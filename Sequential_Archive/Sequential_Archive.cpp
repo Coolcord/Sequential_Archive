@@ -3,7 +3,6 @@
 #include "Packer.h"
 #include "Reader.h"
 #include <QFileInfo>
-#include <QTime>
 
 Sequential_Archive::Sequential_Archive() {
     this->reader = NULL;
@@ -14,7 +13,6 @@ Sequential_Archive::Sequential_Archive() {
 void Sequential_Archive::Startup(QWidget *parent, const QString &applicationLocation) {
     this->parent = parent;
     this->applicationLocation = applicationLocation;
-    qsrand(QTime::currentTime().msecsSinceStartOfDay());
 }
 
 void Sequential_Archive::Shutdown() {
