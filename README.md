@@ -1,4 +1,4 @@
-# Sequential_Archive
+# Sequential Archive
 A simple archive format that stores small amounts of data sequentially
 
 [![GitHub release](https://img.shields.io/github/release/Coolcord/Sequential_Archive.svg)](https://GitHub.com/Coolcord/Sequential_Archive/releases)
