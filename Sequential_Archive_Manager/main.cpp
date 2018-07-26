@@ -7,6 +7,7 @@
 #include <QTime>
 
 int main(int argc, char *argv[]) {
+    QApplication::setStyle("plastique");
     QApplication a(argc, argv);
     qsrand(QTime::currentTime().msecsSinceStartOfDay());
 
