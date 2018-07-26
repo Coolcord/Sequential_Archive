@@ -41,26 +41,34 @@ int Sequential_Archive::Pack(const QString &sourceFolder, const QString &destina
 
 int Sequential_Archive::Unpack(const QString &sourceArchive) {
     if (!this->Open(sourceArchive)) return 1;
-    if (!this->reader->Extract_Directory("/", this->Get_Folder_From_Archive_Path(sourceArchive))) return 2;
-    else return 0;
+    int error = 0;
+    if (!this->reader->Extract_Directory("/", this->Get_Folder_From_Archive_Path(sourceArchive))) error = 2;
+    this->Close();
+    return error;
 }
 
 int Sequential_Archive::Unpack(const QString &sourceArchive, const QString &destinationFolder) {
     if (!this->Open(sourceArchive)) return 1;
-    if (!this->reader->Extract_Directory("/", destinationFolder)) return 2;
-    else return 0;
+    int error = 0;
+    if (!this->reader->Extract_Directory("/", destinationFolder)) error = 2;
+    this->Close();
+    return error;
 }
 
 int Sequential_Archive::Unpack(const QString &sourceArchive, unsigned char scrambleKey) {
     if (!this->Open(sourceArchive, scrambleKey)) return 1;
-    if (!this->reader->Extract_Directory("/", this->Get_Folder_From_Archive_Path(sourceArchive))) return 2;
-    else return 0;
+    int error = 0;
+    if (!this->reader->Extract_Directory("/", this->Get_Folder_From_Archive_Path(sourceArchive))) error = 2;
+    this->Close();
+    return error;
 }
 
 int Sequential_Archive::Unpack(const QString &sourceArchive, const QString &destinationFolder, unsigned char scrambleKey) {
     if (!this->Open(sourceArchive, scrambleKey)) return 1;
-    if (!this->reader->Extract_Directory("/", destinationFolder)) return 2;
-    else return 0;
+    int error = 0;
+    if (!this->reader->Extract_Directory("/", destinationFolder)) error = 2;
+    this->Close();
+    return error;
 }
 
 bool Sequential_Archive::Open(const QString &archive) {

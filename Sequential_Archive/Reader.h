@@ -43,6 +43,7 @@ private:
     QString Get_File_Name_From_Path(const QString &fileNameWithPath);
     bool Get_File_Offset_And_Size(const QString &filePathInArchive, qint64 &offset, qint64 &size);
     QByteArray Read_Bytes(qint64 offset, qint64 size);
+    QByteArray Read_File(qint64 offset, qint64 size);
     QString Get_New_Path(const QString &currentPath, const QString &nextDirectory);
 
     QFile *file;

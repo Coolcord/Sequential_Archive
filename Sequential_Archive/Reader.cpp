@@ -97,7 +97,11 @@ QByteArray Reader::Read_File(const QString &filePathInArchive) {
     qint64 offset = 0;
     qint64 size = 0;
     if (!this->Get_File_Offset_And_Size(filePathInArchive, offset, size)) return QByteArray();
-    return this->Read_Bytes(offset, size);
+    return this->Read_File(offset, size);
+}
+
+QByteArray Reader::Read_File(qint64 offset, qint64 size) {
+    return qUncompress(this->Read_Bytes(offset, size));
 }
 
 bool Reader::Extract_File(const QString &filePathInArchive, const QString &destination) {
@@ -107,7 +111,7 @@ bool Reader::Extract_File(const QString &filePathInArchive, const QString &desti
     if (size > Common_Data::MAX_BUFFER_SIZE) {
         return this->Extract_File_With_Buffer(offset, size, destination);
     } else {
-        QByteArray buffer = this->Read_Bytes(offset, size);
+        QByteArray buffer = this->Read_File(offset, size);
         if (buffer.isEmpty()) return false;
         QFile destinationFile(destination);
         if (!destinationFile.open(QFile::ReadWrite | QFile::Truncate)) return false;
@@ -131,7 +135,7 @@ bool Reader::Extract_File_With_Buffer(qint64 offset, qint64 size, const QString 
         }
 
         //Read the bytes into a buffer and write them to disk
-        QByteArray buffer = this->Read_Bytes(offset, bytesToRead);
+        QByteArray buffer = this->Read_File(offset, bytesToRead);
         offset += bytesToRead;
         bytesRemaining -= bytesToRead;
         if (buffer.isEmpty()) return false;

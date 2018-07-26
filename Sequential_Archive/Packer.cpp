@@ -105,10 +105,11 @@ bool Packer::Pack_Directory(QFile &file, const QString &sourceFolderLocation) {
     //Pack each file. Update the table entry for each file along the way
     foreach (QFileInfo sourceFile, files) {
         qint64 startByte = file.size();
-        if (!this->Pack_File(file, sourceFile.filePath())) return false;
+        qint64 sourceFileCompressedSize = 0;
+        if (!this->Pack_File(file, sourceFile.filePath(), sourceFileCompressedSize)) return false;
 
         //Update the table entry with the new pointers
-        if (!this->Write_Buffer_To_File(file, this->Get_Byte_Array_From_qint64(startByte)+this->Get_Byte_Array_From_qint64(sourceFile.size()), fileTable.value(sourceFile.fileName()))) return false;
+        if (!this->Write_Buffer_To_File(file, this->Get_Byte_Array_From_qint64(startByte)+this->Get_Byte_Array_From_qint64(sourceFileCompressedSize), fileTable.value(sourceFile.fileName()))) return false;
     }
 
     //Pack every subdirectory
@@ -125,24 +126,24 @@ bool Packer::Pack_Directory(QFile &file, const QString &sourceFolderLocation) {
     return true;
 }
 
-bool Packer::Pack_File(QFile &file, const QString &sourceFileLocation) {
+bool Packer::Pack_File(QFile &file, const QString &sourceFileLocation, qint64 &compressedSize) {
     QFile sourceFile(sourceFileLocation);
     if (!sourceFile.open(QFile::ReadOnly)) return false;
 
     //Determine if the entire file can fit into one buffer
     qint64 fileSize = sourceFile.size();
     if (fileSize > Common_Data::MAX_BUFFER_SIZE) {
-        return this->Pack_File_With_Buffers(file, sourceFile, fileSize);
+        return this->Pack_File_With_Buffers(file, sourceFile, fileSize, compressedSize);
     } else {
-        return this->Write_Buffer_To_File(file, sourceFile.readAll());
+        return this->Compress_And_Write_Buffer_To_File(file, sourceFile.readAll(), compressedSize);
     }
 }
 
-bool Packer::Pack_File_With_Buffers(QFile &file, QFile &sourceFile, qint64 fileSize) {
+bool Packer::Pack_File_With_Buffers(QFile &file, QFile &sourceFile, qint64 fileSize, qint64 &compressedSize) {
     while (fileSize > 0) {
         qint64 bufferSize = Common_Data::MAX_BUFFER_SIZE;
         if (fileSize < Common_Data::MAX_BUFFER_SIZE) bufferSize = fileSize;
-        if (!this->Write_Buffer_To_File(file, sourceFile.read(bufferSize))) return false;
+        if (!this->Compress_And_Write_Buffer_To_File(file, sourceFile.read(bufferSize), compressedSize)) return false;
         fileSize -= bufferSize;
     }
     return true;
@@ -170,11 +171,14 @@ QByteArray Packer::Get_Byte_Array_From_int(int number) {
     return byteArray;
 }
 
+bool Packer::Compress_And_Write_Buffer_To_File(QFile &file, QByteArray buffer, qint64 &compressedSize) {
+    buffer = qCompress(buffer);
+    compressedSize = buffer.size();
+    return this->Write_Buffer_To_File(file, buffer);
+}
+
 bool Packer::Write_Buffer_To_File(QFile &file, QByteArray buffer) {
-    if (!file.seek(file.size())) return false;
-    assert(this->scrambler);
-    this->scrambler->Scramble(buffer, file.size());
-    return (file.write(buffer) == buffer.size());
+    return this->Write_Buffer_To_File(file, buffer, file.size());
 }
 
 bool Packer::Write_Buffer_To_File(QFile &file, QByteArray buffer, qint64 offset) {
