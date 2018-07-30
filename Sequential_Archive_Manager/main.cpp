@@ -1,5 +1,6 @@
 #include "Main_Window.h"
 #include "../Sequential_Archive/Sequential_Archive_Interface.h"
+#include "Command_Line_Runner.h"
 #include "Common_Strings.h"
 #include "Error_Messages.h"
 #include <QApplication>
@@ -7,13 +8,14 @@
 #include <QTime>
 
 int main(int argc, char *argv[]) {
+    qsrand(QTime::currentTime().msecsSinceStartOfDay());
+
     //Use Plastique Theme on Windows
     #ifdef Q_OS_WIN32
     QApplication::setStyle("plastique");
     #endif
 
     QApplication a(argc, argv);
-    qsrand(QTime::currentTime().msecsSinceStartOfDay());
 
     //Load the Hexagon Plugin
     QString unableToLoadPluginMessage = Common_Strings::STRING_SEQUENTIAL_ARCHIVE_MANAGER+" is unable to load the backend plugin! Make sure the plugin is in the plugins folder!";
@@ -29,6 +31,9 @@ int main(int argc, char *argv[]) {
         errorMessages.Show_Error(unableToLoadPluginMessage);
         return 1;
     }
+
+    //Run Via Command Line if Necessary
+    if (argc > 1) return Command_Line_Runner(argc, argv, sequentialArchivePlugin).Run_Commands();
 
     Main_Window w(NULL, sequentialArchivePlugin, &errorMessages);
     w.show();

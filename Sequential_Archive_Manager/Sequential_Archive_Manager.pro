@@ -27,14 +27,16 @@ SOURCES += \
         main.cpp \
         Main_Window.cpp \
     Viewer.cpp \
-    Error_Messages.cpp
+    Error_Messages.cpp \
+    Command_Line_Runner.cpp
 
 HEADERS += \
         Main_Window.h \
     Viewer.h \
     Common_Strings.h \
     Error_Messages.h \
-    Version.h
+    Version.h \
+    Command_Line_Runner.h
 
 FORMS += \
         Main_Window.ui \
