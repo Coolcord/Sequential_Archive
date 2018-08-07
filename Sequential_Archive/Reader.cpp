@@ -7,7 +7,7 @@
 
 Reader::Reader(const QString &archiveLocation) {
     this->file = new QFile(archiveLocation);
-    this->scrambler = NULL;
+    this->scrambler = nullptr;
 }
 
 Reader::Reader(const QString &archiveLocation, unsigned char scrambleKey) {
@@ -299,7 +299,7 @@ int Reader::Read_int(qint64 offset) {
     return number;
 }
 
-qint64 Reader::Read_int(const QByteArray &buffer, int offset) {
+int Reader::Read_int(const QByteArray &buffer, qint64 offset) {
     if (buffer.size() < offset+4) return false;
     int number = static_cast<int>(static_cast<unsigned char>(buffer.data()[offset]))*0x1000000;
     number += static_cast<int>(static_cast<unsigned char>(buffer.data()[offset+1]))*0x0010000;

@@ -8,7 +8,7 @@
 #include <QTime>
 
 int main(int argc, char *argv[]) {
-    qsrand(QTime::currentTime().msecsSinceStartOfDay());
+    qsrand(static_cast<unsigned int>(QTime::currentTime().msecsSinceStartOfDay()));
 
     //Use Plastique Theme on Windows
     #ifdef Q_OS_WIN32
@@ -35,7 +35,7 @@ int main(int argc, char *argv[]) {
     //Run Via Command Line if Necessary
     if (argc > 1) return Command_Line_Runner(argc, argv, sequentialArchivePlugin).Run_Commands();
 
-    Main_Window w(NULL, sequentialArchivePlugin, &errorMessages);
+    Main_Window w(nullptr, sequentialArchivePlugin, &errorMessages);
     w.show();
     return a.exec();
 }

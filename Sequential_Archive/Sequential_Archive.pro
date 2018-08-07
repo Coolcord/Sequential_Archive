@@ -8,7 +8,7 @@ QT       += core
 
 TARGET = Sequential_Archive
 TEMPLATE = lib
-CONFIG += plugin c++11 pendantic Wall
+CONFIG += plugin c++11 pendantic Weverything
 
 DEFINES += Sequential_Archive_LIBRARY
 

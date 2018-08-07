@@ -39,7 +39,7 @@ private:
     qint64 Read_qint64(qint64 offset);
     qint64 Read_qint64(const QByteArray &buffer, int offset);
     int Read_int(qint64 offset);
-    qint64 Read_int(const QByteArray &buffer, int offset);
+    int Read_int(const QByteArray &buffer, qint64 offset);
     QString Get_File_Name_From_Path(const QString &fileNameWithPath);
     bool Get_File_Offset_And_Size(const QString &filePathInArchive, qint64 &offset, qint64 &size);
     QByteArray Read_Bytes(qint64 offset, qint64 size);

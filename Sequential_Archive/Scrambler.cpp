@@ -33,5 +33,5 @@ void Scrambler::UnscrambleByte(QByteArray &buffer, int index, qint64 offsetInFil
 }
 
 unsigned char Scrambler::GetScrambleAmount(int index, qint64 offsetInFile) {
-    return (offsetInFile+index+this->scrambleKey)%0x100;
+    return static_cast<unsigned char>((offsetInFile+index+this->scrambleKey)%0x100);
 }

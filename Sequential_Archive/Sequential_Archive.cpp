@@ -5,8 +5,8 @@
 #include <QFileInfo>
 
 Sequential_Archive::Sequential_Archive() {
-    this->reader = NULL;
-    this->parent = NULL;
+    this->reader = nullptr;
+    this->parent = nullptr;
     this->applicationLocation = QString();
 }
 
@@ -78,7 +78,7 @@ bool Sequential_Archive::Open(const QString &archive) {
         return true;
     } else {
         delete this->reader;
-        this->reader = NULL;
+        this->reader = nullptr;
         return false;
     }
 }
@@ -90,7 +90,7 @@ bool Sequential_Archive::Open(const QString &archive, unsigned char scrambleKey)
         return true;
     } else {
         delete this->reader;
-        this->reader = NULL;
+        this->reader = nullptr;
         return false;
     }
 }
@@ -102,7 +102,7 @@ bool Sequential_Archive::Is_Open() {
 void Sequential_Archive::Close() {
     if (this->reader) this->reader->Close();
     delete this->reader;
-    this->reader = NULL;
+    this->reader = nullptr;
 }
 
 QString Sequential_Archive::Get_Archive_Name() {
