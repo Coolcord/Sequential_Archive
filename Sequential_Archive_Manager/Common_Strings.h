@@ -18,7 +18,7 @@ namespace Common_Strings {
     const static QString STRING_EXTENSION = ".sa";
     const static QString STRING_PLUGIN_LOCATION = "./Plugins/Sequential_Archive"+STRING_PLUGIN_EXTENSION;
     const static QString STRING_OK = "OK";
-    const static QString STRING_EXTENSION_FILTERS = STRING_SEQUENTIAL_ARCHIVE+"s (*"+STRING_EXTENSION+")\nAll files (*.*)";
+    const static QString STRING_EXTENSION_FILTERS = STRING_SEQUENTIAL_ARCHIVE+"s (*"+STRING_EXTENSION+", *.lvls)\nAll files (*.*)";
 }
 
 #endif // COMMON_STRINGS
