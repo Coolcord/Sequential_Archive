@@ -5,7 +5,7 @@ A simple archive format that stores small amounts of data sequentially
 [![Github all releases](https://img.shields.io/github/downloads/Coolcord/Sequential_Archive/total.svg)](https://GitHub.com/Coolcord/Sequential_Archive/releases)
 [![GPLv3 license](https://img.shields.io/badge/License-GPLv3-blue.svg)](http://perso.crans.org/besson/LICENSE.html)
 
-# [Download for Windows](https://github.com/Coolcord/Sequential_Archive/releases/download/v1.1.0/SAM.v1.1.0.Setup.exe)
+# [Download for Windows](https://github.com/Coolcord/Sequential_Archive/releases/download/v1.1.1/SAM.v1.1.1.Setup.exe)
 
 ## About Sequential Archives
 The Sequential Archive (.sa) format isn't anything ground breaking. It's simply something I wrote for fun
