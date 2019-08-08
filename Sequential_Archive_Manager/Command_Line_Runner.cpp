@@ -23,7 +23,7 @@ Command_Line_Runner::~Command_Line_Runner() {
 
 int Command_Line_Runner::Run_Commands() {
     switch (this->Parse_Command()) {
-    default: assert(false);
+    default: assert(false); return 1;
     case 0: //Help
         this->Show_Help();
         return 0;
@@ -73,37 +73,37 @@ void Command_Line_Runner::Remove_Command_Identifier_Characters(QString &command)
 
 int Command_Line_Runner::Show_Error(int command, int errorCode) {
     if (errorCode != 0) {
-        qDebug().nospace() << "The operation failed with error code " << errorCode << "!";
-        qDebug() << "Try using the GUI for more details if the error persists.";
+        qInfo().nospace() << "The operation failed with error code " << errorCode << "!";
+        qInfo() << "Try using the GUI for more details if the error persists.";
     } else {
-        if (command == 1) qDebug() << "Packed successfully!";
-        else if (command == 2) qDebug() << "Unpacked successfully!";
-        else qDebug() << "Done!";
+        if (command == 1) qInfo() << "Packed successfully!";
+        else if (command == 2) qInfo() << "Unpacked successfully!";
+        else qInfo() << "Done!";
     }
     return errorCode;
 }
 
 void Command_Line_Runner::Show_Help() {
-    qDebug() << "";
+    qInfo() << "";
 
     //Pack
-    qDebug().noquote() << this->args->at(0) << "--pack [Source Folder]";
-    qDebug().noquote() << this->args->at(0) << "--pack [Source Folder] [Destination Archive]";
-    qDebug() << "    Packs a folder into an archive";
-    qDebug() << "";
+    qInfo().noquote() << this->args->at(0) << "--pack [Source Folder]";
+    qInfo().noquote() << this->args->at(0) << "--pack [Source Folder] [Destination Archive]";
+    qInfo() << "    Packs a folder into an archive";
+    qInfo() << "";
 
     //Unpack
-    qDebug().noquote() << this->args->at(0) << "--unpack [Source Archive]";
-    qDebug().noquote() << this->args->at(0) << "--unpack [Source Archive] [Destination Folder]";
-    qDebug() << "    Unpacks an archive into a folder";
-    qDebug() << "";
+    qInfo().noquote() << this->args->at(0) << "--unpack [Source Archive]";
+    qInfo().noquote() << this->args->at(0) << "--unpack [Source Archive] [Destination Folder]";
+    qInfo() << "    Unpacks an archive into a folder";
+    qInfo() << "";
 
     //Help
-    qDebug().noquote() << this->args->at(0) << "--help";
-    qDebug() << "    Shows this message";
+    qInfo().noquote() << this->args->at(0) << "--help";
+    qInfo() << "    Shows this message";
 }
 
 void Command_Line_Runner::Show_Invalid_Number_Of_Arguments_Message() {
-    qDebug() << "Invalid number of arguments";
+    qInfo() << "Invalid number of arguments";
 }
 
