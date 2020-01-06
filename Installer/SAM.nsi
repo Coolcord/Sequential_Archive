@@ -2,7 +2,7 @@
 
 !define APP_NAME "SAM"
 !define COMP_NAME "Coolcord"
-!define VERSION "1.1.1.0"
+!define VERSION "1.1.1.1"
 !define COPYRIGHT ""
 !define DESCRIPTION "Sequential Archive Manager"
 !define LICENSE_TXT "C:\Installer\LICENSE.txt"
