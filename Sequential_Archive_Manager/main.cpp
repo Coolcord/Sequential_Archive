@@ -8,7 +8,7 @@
 #include <QTime>
 
 int main(int argc, char *argv[]) {
-    qsrand(static_cast<unsigned int>(QTime::currentTime().msecsSinceStartOfDay()));
+    srand(static_cast<unsigned int>(QTime::currentTime().msecsSinceStartOfDay()));
     QApplication a(argc, argv);
     #ifdef Q_OS_WIN32
     a.setStyle("fusion"); //use fusion theme on Windows

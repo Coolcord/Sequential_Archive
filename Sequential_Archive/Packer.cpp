@@ -8,7 +8,7 @@
 #include <assert.h>
 
 Packer::Packer() {
-    this->scrambler = new Scrambler(static_cast<unsigned char>(qrand()%0x100));
+    this->scrambler = new Scrambler(static_cast<unsigned char>(rand()%0x100));
 }
 
 Packer::Packer(unsigned char scrambleKey) {
