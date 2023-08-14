@@ -1,5 +1,6 @@
 #include "Command_Line_Runner.h"
 #include "../Sequential_Archive/Sequential_Archive_Interface.h"
+#include <QFileInfo>
 #include <QDebug>
 
 Command_Line_Runner::Command_Line_Runner(int argc, char *argv[], Sequential_Archive_Interface *sequentialArchivePlugin) {
@@ -76,9 +77,16 @@ int Command_Line_Runner::Show_Error(int command, int errorCode) {
         qInfo().nospace() << "The operation failed with error code " << errorCode << "!";
         qInfo() << "Try using the GUI for more details if the error persists.";
     } else {
-        if (command == 1) qInfo() << "Packed successfully!";
-        else if (command == 2) qInfo() << "Unpacked successfully!";
-        else qInfo() << "Done!";
+        QString fileName = this->Get_Operated_File_Name();
+        if (fileName.isEmpty()) {
+            if (command == 1) qInfo() << "Packed successfully!";
+            else if (command == 2) qInfo() << "Unpacked successfully!";
+            else qInfo() << "Done!";
+        } else {
+            if (command == 1) qInfo().noquote() << "Packed" << fileName << "successfully!";
+            else if (command == 2) qInfo().noquote() << "Unpacked" << fileName << "successfully!";
+            else qInfo() << "Done!";
+        }
     }
     return errorCode;
 }
@@ -105,5 +113,18 @@ void Command_Line_Runner::Show_Help() {
 
 void Command_Line_Runner::Show_Invalid_Number_Of_Arguments_Message() {
     qInfo() << "Invalid number of arguments";
+}
+
+QString Command_Line_Runner::Get_Operated_File_Name() {
+    QString filePath = QString();
+    if (this->args->size() > 2) {
+        filePath = this->args->at(3);
+    } else if (this->args->size() == 2) {
+        filePath = this->args->at(2);
+    } else {
+        return filePath;
+    }
+    QFileInfo fileInfo(filePath);
+    return fileInfo.fileName();
 }
 

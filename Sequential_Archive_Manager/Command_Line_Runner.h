@@ -17,6 +17,7 @@ private:
     int Show_Error(int command, int errorCode);
     void Show_Help();
     void Show_Invalid_Number_Of_Arguments_Message();
+    QString Get_Operated_File_Name();
 
     QStringList *args;
     Sequential_Archive_Interface *sequentialArchivePlugin;
