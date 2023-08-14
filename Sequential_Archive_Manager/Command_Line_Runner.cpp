@@ -83,8 +83,8 @@ int Command_Line_Runner::Show_Error(int command, int errorCode) {
             else if (command == 2) qInfo() << "Unpacked successfully!";
             else qInfo() << "Done!";
         } else {
-            if (command == 1) qInfo().noquote() << "Packed" << fileName << "successfully!";
-            else if (command == 2) qInfo().noquote() << "Unpacked" << fileName << "successfully!";
+            if (command == 1) qInfo() << "Packed" << fileName << "successfully!";
+            else if (command == 2) qInfo() << "Unpacked" << fileName << "successfully!";
             else qInfo() << "Done!";
         }
     }
