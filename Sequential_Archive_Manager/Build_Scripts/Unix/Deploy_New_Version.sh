@@ -76,7 +76,7 @@ cd "$localSourceCodeLocation"/Sequential_Archive
 # Build Sequential_Archive
 echo ""; echo [1/3] Compiling Sequential Archive...
 cd Sequential_Archive/
-mkdir -p build
+rm -rf build >/dev/null 2>&1; mkdir -p build
 cd build
 cmake .. -G Ninja
 ninja -j "$CPUcores" || exit 1
@@ -84,7 +84,7 @@ cd ../../
 
 echo ""; echo [2/3] Compiling SAM...
 cd Sequential_Archive_Manager/
-mkdir -p build
+rm -rf build >/dev/null 2>&1; mkdir -p build
 cd build
 cmake .. -G Ninja
 ninja -j "$CPUcores" || exit 1
