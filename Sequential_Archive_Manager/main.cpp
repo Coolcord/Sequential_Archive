@@ -1,4 +1,5 @@
 #include "Main_Window.h"
+#include "../../C_Common_Code/Qt/Qt_App_Theme_Fixes/Fusion_Fixes.h"
 #include "../Sequential_Archive/Sequential_Archive_Interface.h"
 #include "Command_Line_Runner.h"
 #include "Common_Strings.h"
@@ -11,7 +12,7 @@ int main(int argc, char *argv[]) {
     srand(static_cast<unsigned int>(QTime::currentTime().msecsSinceStartOfDay()));
     QApplication a(argc, argv);
     #ifdef Q_OS_WIN32
-    a.setStyle("fusion"); //use fusion theme on Windows
+    Fusion_Fixes().Apply_Fusion_Fixed(a); //use fusion theme on Windows
     #endif
 
     //Load the Hexagon Plugin

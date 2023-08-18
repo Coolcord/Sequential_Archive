@@ -19,6 +19,7 @@ set(SOURCES
     Viewer.cpp
     Error_Messages.cpp
     Command_Line_Runner.cpp
+    ../../C_Common_Code/Qt/Qt_App_Theme_Fixes/Fusion_Fixes.cpp
 )
 
 set(HEADERS
@@ -28,6 +29,7 @@ set(HEADERS
     Error_Messages.h
     Version.h
     Command_Line_Runner.h
+    ../../C_Common_Code/Qt/Qt_App_Theme_Fixes/Fusion_Fixes.h
 )
 
 set(FORMS
