@@ -252,7 +252,7 @@ if [ ${MSYSTEM} == "MINGW64" ]; then
     sed -i "s|^!define LICENSE_TXT \".*\"|!define LICENSE_TXT \"$licenseLocation\"|" "$installerFile"
 
     # Update the installer output location
-    installerOutputLocation=$(convert_to_windows_path "$(pwd)/Sequential_Archive.$version.Setup.exe")
+    installerOutputLocation=$(convert_to_windows_path "$(pwd)/SAM.$version.Setup.exe")
     sed -i "s|^!define INSTALLER_NAME \".*\"|!define INSTALLER_NAME \"$installerOutputLocation\"|" "$installerFile"
 
     # Compile the Sequential_Archive installer for users who want an installer

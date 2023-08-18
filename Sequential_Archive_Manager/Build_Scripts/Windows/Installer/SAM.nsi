@@ -7,7 +7,7 @@
 !define COPYRIGHT ""
 !define DESCRIPTION "Sequential Archive Manager"
 !define LICENSE_TXT "D:\Documents\Source_Code\Sequential_Archive\Sequential_Archive_Manager\Build_Scripts\Unix\Deployed_Files\LICENSE.txt"
-!define INSTALLER_NAME "D:\Documents\Source_Code\Sequential_Archive\Sequential_Archive_Manager\Build_Scripts\Unix\Deployed_Files\Sequential_Archive.v1.1.2.Setup.exe"
+!define INSTALLER_NAME "D:\Documents\Source_Code\Sequential_Archive\Sequential_Archive_Manager\Build_Scripts\Unix\Deployed_Files\SAM.v1.1.2.Setup.exe"
 !define MAIN_APP_EXE "SAM.exe"
 !define PARENT_INSTALL_PATH "$APPDATA\Coolcord"
 !define INSTALL_PATH "${PARENT_INSTALL_PATH}\${APP_NAME}"
