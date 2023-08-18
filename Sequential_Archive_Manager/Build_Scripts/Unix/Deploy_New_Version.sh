@@ -108,6 +108,7 @@ fi
 cp "$localSourceCodeLocation"/Sequential_Archive/Sequential_Archive_Manager/build/Sequential_Archive_Manager"$exeExt" ./SAM/SAM"$exeExt"
 chmod +x ./SAM/SAM"$exeExt"
 cp "$localSourceCodeLocation"/Sequential_Archive/Sequential_Archive/build/libSequential_Archive"$dllExt" ./SAM/Plugins/Sequential_Archive"$dllExt"
+cp -f "$localSourceCodeLocation/Sequential_Archive/Sequential_Archive_Manager/Build_Scripts/Windows/Installer/UPDATES AND SOURCE CODE.TXT" ./SAM
 
 # Install Qt DLLs
 if [ ${dllExt} == ".dll" ]; then
