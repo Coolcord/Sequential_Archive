@@ -139,7 +139,7 @@ echo ""; echo "Deploying Files..."
 # Zip up SAM archive for users who don't want an installer
 echo ""; echo "Creating 7zip archive..."
 mv ./SAM/ "./SAM $version"
-7z a "./SAM $version.7z" "./SAM $version"
+7z a "./SAM.$version.7z" "./SAM $version"
 mv "./SAM $version" ./SAM/
 
 # Windows Setup.exe section
